@@ -4,3 +4,7 @@ dist/
 .DS_Store
 *.log
 .worktrees/
+build/icon.png
+build/icon.iconset/
+playwright-report/
+test-results/
