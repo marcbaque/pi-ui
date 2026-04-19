@@ -284,6 +284,8 @@ This ships before Phase 2 work begins — release infrastructure and test covera
 
 *(Full design to be written in the Session B brainstorm. Spec summary from full roadmap below.)*
 
+**E2E tests:** Session B implements the skipped stubs in `e2e/phase2/session-history.spec.ts` and adds any new scenarios discovered during implementation.
+
 **Sidebar additions:**
 - Session history list below providers, grouped by date (Today, Yesterday, past weeks)
 - Each entry: session name (or first message truncated), working directory, model, last active timestamp
@@ -307,6 +309,8 @@ This ships before Phase 2 work begins — release infrastructure and test covera
 
 *(Full design to be written in the Session C brainstorm. Spec summary from full roadmap below.)*
 
+**E2E tests:** Session C implements the skipped stubs in `e2e/phase2/tabs.spec.ts` and adds any new scenarios discovered during implementation.
+
 **Tab bar:**
 - Tabs across the top of the window, one per open session
 - Tab: session name (or cwd basename), status dot (green=idle, yellow=thinking, red=error)
@@ -326,6 +330,8 @@ This ships before Phase 2 work begins — release infrastructure and test covera
 **Deliverable:** Real-time file diff view alongside the chat, with inline comments.
 
 *(Full design to be written in the Session D brainstorm. Spec summary from full roadmap below.)*
+
+**E2E tests:** Session D implements the skipped stubs in `e2e/phase2/diff-pane.spec.ts` and adds any new scenarios discovered during implementation.
 
 **Diff pane:**
 - Right panel of per-tab split view, hidden by default
@@ -356,6 +362,8 @@ See Sessions B, C, and D above for the detailed breakdown.
 ### Phase 3 — Quality of Life
 
 **Deliverable:** Polish, productivity shortcuts, ambient awareness.
+
+**E2E tests:** Each Phase 3 feature ships with E2E coverage. Before implementation begins, stub specs are added to `e2e/phase3/` (command-palette, file-attachments, notifications, token-usage) as `test.skip` entries, then implemented alongside each feature.
 
 **Command palette (`Cmd+K`):**
 
