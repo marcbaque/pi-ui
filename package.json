@@ -20,6 +20,7 @@
     "prepare": "husky",
     "dist": "electron-vite build && electron-builder --universal",
     "dist:dir": "electron-vite build && electron-builder --dir --universal",
+    "dist:win": "electron-vite build && electron-builder --win",
     "e2e": "playwright test",
     "e2e:headed": "playwright test --headed",
     "e2e:ui": "playwright test --ui"
@@ -114,6 +115,13 @@
         }
       ],
       "icon": "build/icon.icns"
+    },
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "zip",  "arch": ["x64"] }
+      ],
+      "icon": "build/icon.ico"
     },
     "directories": {
       "output": "dist",

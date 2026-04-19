@@ -17,9 +17,12 @@ function createWindow(): void {
     minWidth: 800,
     minHeight: 600,
     show: false,
-    titleBarStyle: 'hiddenInset',
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     backgroundColor: '#0f0f0f',
-    icon: join(__dirname, '../../build/icon.icns'),
+    icon:
+      process.platform === 'darwin'
+        ? join(__dirname, '../../build/icon.icns')
+        : join(__dirname, '../../build/icon.ico'),
     webPreferences: {
       preload: join(__dirname, '../preload/index.mjs'),
       sandbox: false,

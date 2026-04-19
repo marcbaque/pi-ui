@@ -49,7 +49,7 @@ jobs:
           retention-days: 7
 
   release:
-    name: Build and publish .dmg
+    name: Build and publish .dmg (macOS)
     runs-on: macos-latest
     needs: checks
 
@@ -71,7 +71,6 @@ jobs:
       - name: Build and package
         run: pnpm dist
         env:
-          # Disable code signing for v1 (no Apple Developer account configured)
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
       - name: Upload release assets
@@ -81,3 +80,36 @@ jobs:
             dist/*.dmg
             dist/*.zip
           generate_release_notes: true
+
+  release-windows:
+    name: Build and publish installer (Windows)
+    runs-on: windows-latest
+    needs: checks
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build and package
+        run: pnpm dist:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.exe
+            dist/*.zip
+          generate_release_notes: false
