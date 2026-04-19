@@ -34,7 +34,7 @@ const fakeModel = {
   provider: 'github-copilot',
   reasoning: true,
   name: 'Claude',
-}
+} as never
 const fakeModelService = { findModel: vi.fn(() => fakeModel) } as unknown as ModelService
 const fakeSettingsService = {
   getDefaults: vi.fn(async () => ({ systemPrompt: 'Be concise.' })),
