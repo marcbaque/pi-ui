@@ -23,6 +23,6 @@ export default defineConfig({
         '@shared': resolve('src/shared'),
       },
     },
-    css: { postcss: './postcss.config.js' },
+    css: { postcss: './postcss.config.cjs' },
   },
 })

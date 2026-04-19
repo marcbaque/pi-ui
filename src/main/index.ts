@@ -9,6 +9,9 @@ import { PreferencesService } from './preferences-service'
 import { SessionService } from './session-service'
 import { IpcBridge } from './ipc-bridge'
 
+// Enable remote debugging so agent-browser can connect via CDP
+app.commandLine.appendSwitch('remote-debugging-port', '9223')
+
 function createWindow(): void {
   const win = new BrowserWindow({
     width: 1280,
@@ -19,7 +22,7 @@ function createWindow(): void {
     titleBarStyle: 'hiddenInset',
     backgroundColor: '#0f0f0f',
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: join(__dirname, '../preload/index.mjs'),
       sandbox: false,
       contextIsolation: true,
       nodeIntegration: false,
