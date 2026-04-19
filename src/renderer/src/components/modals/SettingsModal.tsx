@@ -158,7 +158,10 @@ export default function SettingsModal() {
               >
                 <SelectValue placeholder="Select a model" />
               </SelectTrigger>
-              <SelectContent className="border-zinc-800 bg-zinc-900">
+              <SelectContent
+                position="popper"
+                className="max-h-60 overflow-y-auto border-zinc-800 bg-zinc-900"
+              >
                 {config.models.map((m) => (
                   <SelectItem
                     key={`${m.provider}/${m.modelId}`}

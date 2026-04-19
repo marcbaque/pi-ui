@@ -20,7 +20,8 @@ export default function InputArea() {
     try {
       await window.pi.session.send(session.sessionId, msg)
     } catch (err) {
-      console.error(err)
+      console.error('[send]', err)
+      setSessionStatus('error')
     }
   }
 
@@ -48,7 +49,11 @@ export default function InputArea() {
           disabled={thinking}
           rows={1}
           placeholder={
-            thinking ? 'pi is working…' : 'Send a message… (Enter to send, Shift+Enter for newline)'
+            thinking
+              ? 'pi is working…'
+              : session.status === 'error'
+                ? 'Something went wrong — try again'
+                : 'Send a message… (Enter to send, Shift+Enter for newline)'
           }
           className="w-full resize-none bg-transparent px-3 py-2.5 text-sm text-zinc-300 placeholder-zinc-600 outline-none disabled:cursor-not-allowed"
           style={{ minHeight: 40, maxHeight: 160 }}

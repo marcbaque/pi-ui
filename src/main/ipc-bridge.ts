@@ -66,15 +66,25 @@ export class IpcBridge {
 
   private registerSession(): void {
     ipcMain.handle('session:create', async (_e, opts) => {
-      return this.sessions.createSession(opts, (event, payload) => {
-        this.sendToRenderer(event, payload)
-      })
+      try {
+        return await this.sessions.createSession(opts, (event, payload) => {
+          this.sendToRenderer(event, payload)
+        })
+      } catch (err) {
+        console.error('[session:create]', err)
+        throw err
+      }
     })
 
     ipcMain.handle(
       'session:send',
       async (_e, { sessionId, message }: { sessionId: string; message: string }) => {
-        await this.sessions.send(sessionId, message)
+        try {
+          await this.sessions.send(sessionId, message)
+        } catch (err) {
+          console.error('[session:send]', err)
+          throw err
+        }
       }
     )
 
@@ -108,8 +118,13 @@ export class IpcBridge {
 
   private registerHistory(): void {
     ipcMain.handle('sessions:list', async () => {
-      const activeIds = this.sessions.getActiveSessionIds()
-      return this.store.list(activeIds)
+      try {
+        const activeIds = this.sessions.getActiveSessionIds()
+        return await this.store.list(activeIds)
+      } catch (err) {
+        console.error('[sessions:list]', err)
+        throw err
+      }
     })
 
     ipcMain.handle(

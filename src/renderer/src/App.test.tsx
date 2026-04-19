@@ -14,15 +14,15 @@ vi.stubGlobal('pi', {
     })),
   },
   models: { list: vi.fn(async () => []) },
+  sessions: { list: vi.fn(async () => []) },
   on: vi.fn(() => () => {}),
 })
 
 describe('App', () => {
   it('renders sidebar and chat pane', () => {
     render(<App />)
-    // Sidebar logo (split across spans — match by container text)
-    const logos = screen.getAllByText((_, el) => el?.textContent === 'pi-ui')
-    expect(logos.length).toBeGreaterThan(0)
+    // Settings button in sidebar footer
+    expect(screen.getByTestId('settings-btn')).toBeInTheDocument()
     // Chat empty state
     expect(screen.getByText(/no active session/i)).toBeInTheDocument()
   })

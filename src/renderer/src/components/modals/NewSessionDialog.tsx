@@ -27,6 +27,7 @@ export default function NewSessionDialog() {
   const [provider, setProvider] = useState(config.defaultProvider ?? '')
   const [thinking, setThinking] = useState<AppThinkingLevel>(config.defaultThinkingLevel)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Fall back to config defaults if user hasn't made a selection yet
   const effectiveModel = model || config.defaultModel || ''
@@ -40,6 +41,7 @@ export default function NewSessionDialog() {
   async function handleStart() {
     if (!cwd || !effectiveModel || !effectiveProvider) return
     setLoading(true)
+    setError(null)
     try {
       const { sessionId } = await window.pi.session.create({
         cwd,
@@ -56,7 +58,8 @@ export default function NewSessionDialog() {
       })
       closeNewSession()
     } catch (err) {
-      console.error('Failed to create session:', err)
+      console.error('[session:create]', err)
+      setError(err instanceof Error ? err.message : 'Failed to start session')
     } finally {
       setLoading(false)
     }
@@ -113,7 +116,10 @@ export default function NewSessionDialog() {
               >
                 <SelectValue placeholder="Select a model" />
               </SelectTrigger>
-              <SelectContent className="border-zinc-800 bg-zinc-900">
+              <SelectContent
+                position="popper"
+                className="max-h-60 overflow-y-auto border-zinc-800 bg-zinc-900"
+              >
                 {config.models.map((m) => (
                   <SelectItem
                     key={`${m.provider}/${m.modelId}`}
@@ -152,6 +158,7 @@ export default function NewSessionDialog() {
         </div>
 
         <div className="flex justify-end gap-2 pt-1">
+          {error && <p className="mr-auto self-center text-xs text-red-400">{error}</p>}
           <Button
             data-testid="cancel-session-btn"
             aria-label="Cancel"

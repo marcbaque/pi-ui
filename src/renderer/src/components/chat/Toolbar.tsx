@@ -45,7 +45,10 @@ export default function Toolbar() {
         <SelectTrigger className="h-7 w-48 border-zinc-800 bg-zinc-900 text-xs text-zinc-400">
           <SelectValue />
         </SelectTrigger>
-        <SelectContent className="border-zinc-800 bg-zinc-900">
+        <SelectContent
+          position="popper"
+          className="max-h-60 overflow-y-auto border-zinc-800 bg-zinc-900"
+        >
           {config.models.map((m) => (
             <SelectItem
               key={`${m.provider}/${m.modelId}`}
