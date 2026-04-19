@@ -79,7 +79,8 @@ describe('NewSessionDialog', () => {
     render(<NewSessionDialog />)
     fireEvent.click(screen.getByRole('button', { name: /start/i }))
     await waitFor(() => expect(mockCreate).toHaveBeenCalled())
-    const callArg = mockCreate.mock.calls[0][0] as Record<string, unknown>
-    expect(callArg).not.toHaveProperty('name')
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.not.objectContaining({ name: expect.anything() })
+    )
   })
 })

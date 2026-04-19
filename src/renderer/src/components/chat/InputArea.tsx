@@ -88,9 +88,12 @@ export default function InputArea() {
   }
 
   async function openSlashMenu(query: string) {
-    if (!commandCacheRef.current || commandCacheRef.current.tabId !== tab.id) {
-      const cmds = await window.pi.session.listCommands(tab.sessionId)
-      commandCacheRef.current = { tabId: tab.id, commands: cmds }
+    if (!tab) return
+    const tabId = tab.id
+    const sessionId = tab.sessionId
+    if (!commandCacheRef.current || commandCacheRef.current.tabId !== tabId) {
+      const cmds = await window.pi.session.listCommands(sessionId)
+      commandCacheRef.current = { tabId, commands: cmds }
     }
     const filtered = filterCommands(query, commandCacheRef.current.commands)
     setFilteredCommands(filtered)
