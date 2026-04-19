@@ -44,7 +44,9 @@ function createWindow(): void {
     win.loadFile(join(__dirname, '../renderer/index.html'))
   }
 
-  win.on('ready-to-show', () => win.show())
+  win.on('ready-to-show', () => {
+    if (!process.env['PI_E2E']) win.show()
+  })
 }
 
 app.whenReady().then(() => {

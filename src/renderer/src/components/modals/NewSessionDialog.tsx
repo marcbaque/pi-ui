@@ -28,22 +28,32 @@ export default function NewSessionDialog() {
   const [thinking, setThinking] = useState<AppThinkingLevel>(config.defaultThinkingLevel)
   const [loading, setLoading] = useState(false)
 
+  // Fall back to config defaults if user hasn't made a selection yet
+  const effectiveModel = model || config.defaultModel || ''
+  const effectiveProvider = provider || config.defaultProvider || ''
+
   async function handleBrowse() {
     const dir = await window.pi.dialog.openDirectory()
     if (dir) setCwd(dir)
   }
 
   async function handleStart() {
-    if (!cwd || !model || !provider) return
+    if (!cwd || !effectiveModel || !effectiveProvider) return
     setLoading(true)
     try {
       const { sessionId } = await window.pi.session.create({
         cwd,
-        model,
-        provider,
+        model: effectiveModel,
+        provider: effectiveProvider,
         thinkingLevel: thinking,
       })
-      setSessionActive({ sessionId, cwd, model, provider, thinkingLevel: thinking })
+      setSessionActive({
+        sessionId,
+        cwd,
+        model: effectiveModel,
+        provider: effectiveProvider,
+        thinkingLevel: thinking,
+      })
       closeNewSession()
     } catch (err) {
       console.error('Failed to create session:', err)
@@ -90,7 +100,7 @@ export default function NewSessionDialog() {
           <div className="space-y-1.5">
             <label className="text-[10px] uppercase tracking-widest text-zinc-500">Model</label>
             <Select
-              value={model ? `${provider}/${model}` : ''}
+              value={effectiveModel ? `${effectiveProvider}/${effectiveModel}` : ''}
               onValueChange={(val) => {
                 const [p, ...rest] = val.split('/')
                 setProvider(p)
@@ -155,7 +165,7 @@ export default function NewSessionDialog() {
             data-testid="start-session-btn"
             aria-label="Start"
             onClick={handleStart}
-            disabled={loading || !cwd || !model}
+            disabled={loading || !cwd || !effectiveModel}
             className="bg-emerald-950 text-xs text-emerald-400 hover:bg-emerald-900"
           >
             {loading ? 'Starting…' : 'Start Session →'}

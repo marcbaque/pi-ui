@@ -9,12 +9,14 @@ export default function InputArea() {
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const thinking = session.status === 'thinking'
+  const setSessionStatus = useStore((s) => s.setSessionStatus)
 
   async function send() {
     const msg = value.trim()
     if (!msg || !session.sessionId) return
     setValue('')
     addUserMessage(msg)
+    setSessionStatus('thinking')
     try {
       await window.pi.session.send(session.sessionId, msg)
     } catch (err) {

@@ -19,7 +19,7 @@ test('model dropdown lists available models', async ({ page }) => {
   await sidebar.newSessionBtn(page).click()
   await newSessionDialog.modelSelect(page).click()
   for (const model of DEFAULT_MODELS) {
-    await expect(page.getByText(model.displayName)).toBeVisible()
+    await expect(page.getByText(model.displayName).first()).toBeVisible()
   }
 })
 
