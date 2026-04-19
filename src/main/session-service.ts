@@ -100,6 +100,7 @@ export class SessionService {
     if (!model) throw new Error(`Model not found: ${opts.provider}/${opts.model}`)
 
     const loader = new DefaultResourceLoader({ cwd: opts.cwd })
+    await loader.reload()
 
     const sessionManager = SessionManager.create(opts.cwd)
     const sdkSessionId = sessionManager.getSessionId()

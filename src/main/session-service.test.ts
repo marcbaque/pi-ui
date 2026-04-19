@@ -41,7 +41,7 @@ const mockSession = {
 vi.mock('@mariozechner/pi-coding-agent', () => ({
   createAgentSession: vi.fn(async () => ({ session: mockSession })),
   DefaultResourceLoader: vi.fn().mockImplementation(function () {
-    return {}
+    return { reload: vi.fn().mockResolvedValue(undefined) }
   }),
   SessionManager: {
     create: vi.fn(() => ({
