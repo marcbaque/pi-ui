@@ -1,7 +1,7 @@
 // e2e/new-session.spec.ts
 import { test, expect } from './helpers/app'
 import { chat, newSessionDialog, tabs } from './helpers/selectors'
-import { DEFAULT_MODELS } from './helpers/defaults'
+import { DEFAULT_MODELS, DEFAULT_CONFIG } from './helpers/defaults'
 
 // Helper: open New Session dialog from empty state
 async function openNewSessionDialog(page: Parameters<typeof chat.emptyState>[0]) {
@@ -30,7 +30,13 @@ test('working directory field is pre-populated', async ({ page }) => {
 test('model dropdown lists available models', async ({ page }) => {
   await openNewSessionDialog(page)
   await newSessionDialog.modelSelect(page).click()
-  for (const model of DEFAULT_MODELS) {
+  const configuredProviders = new Set(
+    DEFAULT_CONFIG.providers.filter((p) => p.configured).map((p) => p.name.toLowerCase())
+  )
+  const availableModels = DEFAULT_MODELS.filter((m) =>
+    configuredProviders.has(m.provider.toLowerCase())
+  )
+  for (const model of availableModels) {
     await expect(page.getByText(model.displayName).first()).toBeVisible()
   }
 })
