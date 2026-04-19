@@ -10,6 +10,7 @@ export default function InputArea() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const thinking = session.status === 'thinking'
   const setSessionStatus = useStore((s) => s.setSessionStatus)
+  const homedir = useStore((s) => s.config.homedir)
 
   async function send() {
     const msg = value.trim()
@@ -139,7 +140,7 @@ export default function InputArea() {
               className="truncate hover:underline"
               style={{ color: 'var(--pi-dim)', maxWidth: '200px' }}
             >
-              {session.cwd.replace(process.env.HOME ?? '/Users', '~')}
+              {homedir ? session.cwd.replace(homedir, '~') : session.cwd}
             </button>
           </>
         )}

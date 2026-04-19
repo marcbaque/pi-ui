@@ -142,6 +142,7 @@ describe('config slice', () => {
       defaultProvider: 'anthropic',
       defaultThinkingLevel: 'low',
       systemPrompt: '',
+      homedir: '/Users/test',
     })
     expect(getStore().config.providers).toHaveLength(1)
     expect(getStore().config.defaultModel).toBe('claude')

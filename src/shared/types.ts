@@ -23,6 +23,7 @@ export interface AppConfig {
   defaultProvider: string | null
   defaultThinkingLevel: AppThinkingLevel
   systemPrompt: string
+  homedir: string
 }
 
 export interface AppDefaults {

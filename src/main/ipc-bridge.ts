@@ -5,6 +5,7 @@ import type { ModelService } from './model-service'
 import type { SettingsService } from './settings-service'
 import type { PreferencesService } from './preferences-service'
 import type { SessionService } from './session-service'
+import { homedir } from 'os'
 import { SessionStore } from './session-store'
 import type { PiEventName, PiEventPayloads } from '@shared/types'
 
@@ -40,7 +41,7 @@ export class IpcBridge {
         this.auth.getProviderStatuses(),
         this.settings.getDefaults(),
       ])
-      return { providers, ...defaults }
+      return { providers, ...defaults, homedir: homedir() }
     })
 
     ipcMain.handle(

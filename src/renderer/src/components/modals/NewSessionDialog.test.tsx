@@ -32,6 +32,7 @@ describe('NewSessionDialog', () => {
       defaultProvider: 'anthropic',
       defaultThinkingLevel: 'low',
       systemPrompt: '',
+      homedir: '/Users/test',
     })
   })
 

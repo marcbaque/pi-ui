@@ -72,6 +72,7 @@ export default function SettingsModal() {
     <Dialog open={ui.settingsOpen} onOpenChange={(open) => !open && closeSettings()}>
       <DialogContent
         data-testid="settings-modal"
+        aria-describedby={undefined}
         className="max-h-[80vh] overflow-y-auto border-zinc-800 bg-[#161616] text-zinc-200 sm:max-w-lg"
       >
         <DialogHeader>

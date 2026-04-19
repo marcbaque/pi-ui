@@ -24,6 +24,7 @@ if (process.env['PI_E2E']) {
     defaultProvider: 'Anthropic',
     defaultThinkingLevel: 'off',
     systemPrompt: '',
+    homedir: '/Users/test',
   }
 
   const DEFAULT_MODELS: ModelEntry[] = [
@@ -107,6 +108,7 @@ if (process.env['PI_E2E']) {
       get: async () => ({
         ...DEFAULT_CONFIG,
         providers: DEFAULT_CONFIG.providers.map((p) => ({ ...p })),
+        homedir: '/Users/test',
       }),
       setApiKey: async () => {},
       setDefaults: async () => {},

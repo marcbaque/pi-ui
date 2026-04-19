@@ -69,6 +69,7 @@ export default function NewSessionDialog() {
     <Dialog open={ui.newSessionOpen} onOpenChange={(open) => !open && closeNewSession()}>
       <DialogContent
         data-testid="new-session-dialog"
+        aria-describedby={undefined}
         className="border-zinc-800 bg-[#161616] text-zinc-200 sm:max-w-md"
       >
         <DialogHeader>
