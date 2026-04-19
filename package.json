@@ -19,7 +19,10 @@
     "check": "pnpm typecheck && pnpm lint && pnpm test:run",
     "prepare": "husky",
     "dist": "electron-vite build && electron-builder --universal",
-    "dist:dir": "electron-vite build && electron-builder --dir --universal"
+    "dist:dir": "electron-vite build && electron-builder --dir --universal",
+    "e2e": "playwright test",
+    "e2e:headed": "playwright test --headed",
+    "e2e:ui": "playwright test --ui"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx}": [
@@ -48,6 +51,7 @@
   "devDependencies": {
     "@electron-toolkit/utils": "^4.0.0",
     "@eslint/js": "^9.39.4",
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4.2.2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -71,6 +75,7 @@
     "husky": "^9.1.7",
     "jsdom": "^29.0.2",
     "lint-staged": "^16.4.0",
+    "playwright": "^1.59.1",
     "postcss": "^8.5.10",
     "prettier": "^3.8.3",
     "tailwindcss": "^4.2.2",
@@ -92,8 +97,18 @@
     "productName": "pi-ui",
     "mac": {
       "target": [
-        { "target": "dmg", "arch": ["universal"] },
-        { "target": "zip", "arch": ["universal"] }
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "universal"
+          ]
+        }
       ],
       "icon": "build/icon.icns"
     },
