@@ -51,6 +51,7 @@ export default function MessageList({ readonlyMessages }: Props = {}) {
   const tab = useStore((s) => s.tabs.tabs.find((t) => t.id === s.tabs.activeTabId))
   const messages = readonlyMessages ?? tab?.messages ?? []
   const streamingContent = readonlyMessages ? '' : (tab?.currentStreamingContent ?? '')
+  const isThinking = !readonlyMessages && tab?.status === 'thinking' && !streamingContent
   const scrollRef = useAutoScroll<HTMLDivElement>(messages.length + streamingContent.length)
 
   return (
@@ -73,6 +74,23 @@ export default function MessageList({ readonlyMessages }: Props = {}) {
       ))}
 
       {streamingContent && <AssistantMessage content={streamingContent} streaming />}
+
+      {isThinking && (
+        <div className="mx-3 flex items-center gap-1 py-3">
+          <span
+            className="h-1.5 w-1.5 animate-bounce rounded-full [animation-delay:-0.3s]"
+            style={{ backgroundColor: 'var(--pi-accent)' }}
+          />
+          <span
+            className="h-1.5 w-1.5 animate-bounce rounded-full [animation-delay:-0.15s]"
+            style={{ backgroundColor: 'var(--pi-accent)' }}
+          />
+          <span
+            className="h-1.5 w-1.5 animate-bounce rounded-full"
+            style={{ backgroundColor: 'var(--pi-accent)' }}
+          />
+        </div>
+      )}
     </div>
   )
 }
