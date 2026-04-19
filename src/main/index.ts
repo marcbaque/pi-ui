@@ -1,5 +1,5 @@
 // src/main/index.ts
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, nativeImage } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import { AuthService } from './auth-service'
@@ -50,6 +50,11 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
+  // Set Dock icon (macOS only) — needed when running unpackaged
+  if (process.platform === 'darwin' && app.dock) {
+    const icon = nativeImage.createFromPath(join(__dirname, '../../build/icon.icns'))
+    app.dock.setIcon(icon)
+  }
   createWindow()
 
   app.on('activate', () => {
