@@ -27,6 +27,8 @@ export class IpcBridge {
     this.registerDialog()
     this.registerShell()
     this.registerHistory()
+    // Debug: expose active session list
+    this.handle('debug:sessions', () => this.sessions.getActiveSessionIds())
   }
 
   // Safe wrapper: removes any existing handler before registering.

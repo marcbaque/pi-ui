@@ -120,10 +120,12 @@ export class SessionService {
   }
 
   async send(sessionId: string, message: string): Promise<void> {
-    console.log(
-      `[SessionService.send] sessionId=${sessionId} sessions=${[...this.sessions.keys()].join(',')}`
-    )
-    await this.getOrThrow(sessionId).session.prompt(message)
+    const entry = this.sessions.get(sessionId)
+    if (!entry)
+      throw new Error(
+        `[SessionService.send] not found: ${sessionId}. Known: ${[...this.sessions.keys()].join(',')}`
+      )
+    await entry.session.prompt(message)
   }
 
   async abort(sessionId: string, onEvent: EventCallback): Promise<void> {
@@ -140,7 +142,7 @@ export class SessionService {
   }
 
   getActiveSessionIds(): string[] {
-    return Array.from(this.sessions.values()).map((s) => s.sdkSessionId)
+    return Array.from(this.sessions.keys())
   }
 
   registerResumedSession(
@@ -152,6 +154,11 @@ export class SessionService {
     const session = sdkSession as SdkSession
     const unsubscribe = this.subscribeSession(sessionId, session, onEvent)
     this.sessions.set(sessionId, { session, unsubscribe, sdkSessionId })
+    // Send a test event so we can confirm the IPC path works
+    onEvent(
+      'pi:debug' as never,
+      { msg: `registerResumedSession ok, sessionId=${sessionId}` } as never
+    )
   }
 
   private getOrThrow(sessionId: string): ActiveSession {

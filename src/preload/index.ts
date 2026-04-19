@@ -223,4 +223,7 @@ if (process.env['PI_E2E']) {
   }
 
   contextBridge.exposeInMainWorld('pi', api)
+  contextBridge.exposeInMainWorld('piDebug', {
+    sessions: () => ipcRenderer.invoke('debug:sessions'),
+  })
 }
