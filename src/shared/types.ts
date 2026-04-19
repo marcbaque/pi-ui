@@ -152,7 +152,7 @@ export interface PiAPI {
     ): Promise<void>
     delete(sessionId: string): Promise<void>
     load(sessionPath: string): Promise<Message[]>
-    resume(sessionPath: string, modelId?: string): Promise<{ sessionId: string }>
+    resume(sessionPath: string): Promise<{ sessionId: string }>
   }
   on<E extends PiEventName>(event: E, handler: (payload: PiEventPayloads[E]) => void): () => void
 }

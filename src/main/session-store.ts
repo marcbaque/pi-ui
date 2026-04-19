@@ -15,6 +15,7 @@ import type {
   PiEventName,
   PiEventPayloads,
 } from '@shared/types'
+import type { ModelService } from './model-service'
 
 type EventCallback = <E extends PiEventName>(event: E, payload: PiEventPayloads[E]) => void
 
@@ -24,6 +25,38 @@ export class SessionStore {
   private readonly pathById = new Map<string, string>()
 
   constructor(private readonly fsImpl: FsLike = fs) {}
+
+  private readModelFromJsonl(sessionPath: string): string | null {
+    try {
+      const content = this.fsImpl.readFileSync(sessionPath, 'utf-8') as string
+      for (const line of content.split('\n')) {
+        if (!line.trim()) continue
+        const entry = JSON.parse(line) as { type: string; provider?: string; modelId?: string }
+        if (entry.type === 'model_change' && entry.modelId) {
+          return entry.modelId
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return null
+  }
+
+  private readProviderFromJsonl(sessionPath: string): string | null {
+    try {
+      const content = this.fsImpl.readFileSync(sessionPath, 'utf-8') as string
+      for (const line of content.split('\n')) {
+        if (!line.trim()) continue
+        const entry = JSON.parse(line) as { type: string; provider?: string; modelId?: string }
+        if (entry.type === 'model_change' && entry.provider) {
+          return entry.provider
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return null
+  }
 
   async list(activeSessionIds: string[]): Promise<SessionSummary[]> {
     const infos = await SessionManager.listAll()
@@ -42,7 +75,7 @@ export class SessionStore {
         cwd: info.cwd,
         cwdSlug,
         lastActiveAt: info.modified.getTime(),
-        model: null,
+        model: this.readModelFromJsonl(info.path),
         pinned: sessionMeta?.pinned ?? false,
         tags: sessionMeta?.tags ?? [],
         name: info.name ?? null,
@@ -93,12 +126,22 @@ export class SessionStore {
 
   async resume(
     sessionPath: string,
-    model: unknown,
+    modelService: ModelService,
     _onEvent: EventCallback
   ): Promise<{ sessionId: string; sdkSession: unknown }> {
     const manager = SessionManager.open(sessionPath)
     const cwd = manager.getCwd()
     const loader = new DefaultResourceLoader({ cwd })
+    // Read model+provider from the session JSONL and look up the full model object
+    const modelId = this.readModelFromJsonl(sessionPath)
+    const provider = this.readProviderFromJsonl(sessionPath)
+    const model =
+      modelId && provider
+        ? modelService.findModel(provider, modelId)
+        : modelId
+          ? modelService.findModelById(modelId)
+          : undefined
+    console.log(`[SessionStore.resume] modelId=${modelId} provider=${provider} found=${!!model}`)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const opts: any = { cwd, resourceLoader: loader, sessionManager: manager }
     if (model) opts.model = model
