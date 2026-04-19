@@ -50,7 +50,8 @@ function buildMessage(text: string, files: AttachedFile[]): string {
     .map((f) => {
       const ext = f.name.split('.').pop() ?? ''
       const lang = EXT_LANG[ext] ?? ext
-      return `**Attached file: \`${f.name}\`**\n\`\`\`${lang}\n${f.content}\n\`\`\``
+      // 4-backtick fence: immune to files containing ``` at line start
+      return `**Attached: \`${f.name}\`**\n\`\`\`\`${lang}\n${f.content}\n\`\`\`\``
     })
     .join('\n\n')
   return text ? `${fileParts}\n\n${text}` : fileParts
@@ -76,9 +77,9 @@ export default function InputArea() {
   if (!tab || tab.mode !== 'active') return null
 
   const thinking = tab.status === 'thinking'
-  const hasErrors = attachedFiles.some((f) => f.error)
-  const hasContent = value.trim().length > 0 || attachedFiles.filter((f) => !f.error).length > 0
-  const canSend = hasContent && !hasErrors
+  const validFiles = attachedFiles.filter((f) => !f.error)
+  const hasContent = value.trim().length > 0 || validFiles.length > 0
+  const canSend = hasContent
 
   function filterCommands(query: string, allCommands: SlashCommand[]): SlashCommand[] {
     const q = query.toLowerCase()
@@ -138,7 +139,7 @@ export default function InputArea() {
 
   async function send() {
     if (!tab || !canSend) return
-    const msg = buildMessage(value.trim(), attachedFiles)
+    const msg = buildMessage(value.trim(), validFiles)
     setValue('')
     setAttachedFiles([])
     closeSlashMenu()
@@ -234,7 +235,10 @@ export default function InputArea() {
   async function handlePaperclip() {
     try {
       const result = await window.pi.dialog.pickFile()
-      if (!result) return
+      if (!result) {
+        setTimeout(() => textareaRef.current?.focus(), 50)
+        return
+      }
       addFile(result.name, result.path, result.content)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Could not read file'
@@ -243,7 +247,8 @@ export default function InputArea() {
         { id: crypto.randomUUID(), name: 'file', path: '', content: '', error: msg },
       ])
     }
-    textareaRef.current?.focus()
+    // Defer focus: give Electron time to return OS focus after sheet dismisses
+    setTimeout(() => textareaRef.current?.focus(), 50)
   }
 
   return (
