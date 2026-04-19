@@ -100,3 +100,8 @@ export const tabs = {
   confirmBtn: (page: Page) => page.locator('[data-testid="tab-close-confirm-btn"]'),
   cancelBtn: (page: Page) => page.locator('[data-testid="tab-close-cancel-btn"]'),
 }
+
+export const updateBanner = {
+  root: (page: Page) => page.locator('[data-testid="update-banner"]'),
+  installBtn: (page: Page) => page.locator('[data-testid="update-install-btn"]'),
+}

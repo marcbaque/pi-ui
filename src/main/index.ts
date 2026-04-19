@@ -10,7 +10,7 @@ import { SessionService } from './session-service'
 import { IpcBridge } from './ipc-bridge'
 import { SessionStore } from './session-store'
 
-function createWindow(): void {
+async function createWindow(): Promise<void> {
   const win = new BrowserWindow({
     width: 1280,
     height: 800,
@@ -41,6 +41,15 @@ function createWindow(): void {
   const bridge = new IpcBridge(win, auth, models, settings, prefs, sessions, store)
   bridge.register()
 
+  // Auto-updater — skip in dev and E2E
+  let updater: import('./update-service').UpdateService | null = null
+  if (!is.dev && !process.env['PI_E2E']) {
+    const { UpdateService } = await import('./update-service')
+    updater = new UpdateService(win, (event, payload) => bridge.sendToRenderer(event, payload))
+    updater.init()
+  }
+  bridge.setUpdater(updater)
+
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     win.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
@@ -48,7 +57,11 @@ function createWindow(): void {
   }
 
   win.on('ready-to-show', () => {
-    if (!process.env['PI_E2E']) win.show()
+    if (!process.env['PI_E2E']) {
+      win.show()
+      // Check for updates 3 s after window is shown (non-blocking)
+      if (updater) setTimeout(() => updater!.checkForUpdates(), 3000)
+    }
   })
 }
 

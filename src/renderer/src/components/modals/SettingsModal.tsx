@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { useStore } from '@/store'
 import {
   Select,
   SelectContent,
@@ -12,7 +13,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import { useStore } from '@/store'
 import type { AppThinkingLevel } from '@shared/types'
 
 const THINKING_LEVELS: AppThinkingLevel[] = ['off', 'low', 'high']
@@ -247,7 +247,82 @@ export default function SettingsModal() {
             </Button>
           </div>
         </div>
+
+        <UpdateSection />
       </DialogContent>
     </Dialog>
+  )
+}
+
+function UpdateSection() {
+  const status = useStore((s) => s.ui.updateStatus)
+  const version = useStore((s) => s.ui.updateVersion)
+  const progress = useStore((s) => s.ui.updateProgress)
+  const error = useStore((s) => s.ui.updateError)
+  const appVersion = window.__APP_VERSION__ ?? 'dev'
+
+  function statusLabel() {
+    switch (status) {
+      case 'checking':
+        return 'Checking for updates…'
+      case 'available':
+        return `Downloading update${version ? ` v${version}` : ''}…`
+      case 'downloading':
+        return `Downloading${progress != null ? ` ${progress}%` : ''}…`
+      case 'up-to-date':
+        return `You’re up to date (v${version ?? appVersion})`
+      case 'ready':
+        return `v${version} ready — restart to install`
+      case 'error':
+        return `Update check failed${error ? `: ${error}` : ''}`
+      default:
+        return null
+    }
+  }
+
+  const label = statusLabel()
+
+  return (
+    <div className="border-t border-zinc-900 pt-4">
+      <p className="mb-3 text-[10px] uppercase tracking-widest text-zinc-500">App Updates</p>
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-zinc-600">v{appVersion}</span>
+        {status === 'ready' ? (
+          <Button
+            data-testid="update-install-settings-btn"
+            size="sm"
+            onClick={() => window.pi.update.install()}
+            className="border border-[var(--pi-accent)] bg-transparent text-xs text-[var(--pi-accent)] hover:bg-zinc-800"
+          >
+            Restart &amp; update
+          </Button>
+        ) : (
+          <Button
+            data-testid="check-updates-btn"
+            size="sm"
+            disabled={status === 'checking' || status === 'available' || status === 'downloading'}
+            onClick={() => window.pi.update.check()}
+            className="border border-zinc-800 bg-transparent text-xs text-zinc-500 hover:text-zinc-300"
+          >
+            Check for updates
+          </Button>
+        )}
+        {label && (
+          <span
+            className="text-xs"
+            style={{
+              color:
+                status === 'error'
+                  ? 'var(--pi-error)'
+                  : status === 'ready'
+                    ? 'var(--pi-success)'
+                    : 'var(--pi-dim)',
+            }}
+          >
+            {label}
+          </span>
+        )}
+      </div>
+    </div>
   )
 }

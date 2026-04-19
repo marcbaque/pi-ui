@@ -106,6 +106,12 @@ export interface PiEventPayloads {
   'pi:turn-end': { sessionId: string }
   'pi:idle': { sessionId: string }
   'pi:error': { sessionId: string; message: string }
+  'update:checking': Record<string, never>
+  'update:available': { version: string }
+  'update:not-available': { version: string }
+  'update:progress': { percent: number; bytesPerSecond: number; transferred: number; total: number }
+  'update:ready': { version: string }
+  'update:error': { message: string }
 }
 
 export interface SessionSummary {
@@ -169,4 +175,8 @@ export interface PiAPI {
     resume(sessionPath: string): Promise<{ sessionId: string }>
   }
   on<E extends PiEventName>(event: E, handler: (payload: PiEventPayloads[E]) => void): () => void
+  update: {
+    check(): Promise<void>
+    install(): Promise<void>
+  }
 }

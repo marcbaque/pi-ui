@@ -2,9 +2,11 @@
 import { useEffect, useCallback } from 'react'
 import { useStore } from './store'
 import { usePiEvents } from './hooks/usePiEvents'
+import { useUpdateEvents } from './hooks/useUpdateEvents'
 import Sidebar from './components/sidebar/Sidebar'
 import TabBar from './components/tabs/TabBar'
 import ChatPane from './components/chat/ChatPane'
+import UpdateBanner from './components/UpdateBanner'
 import DiffPane from './components/diff/DiffPane'
 import NewSessionDialog from './components/modals/NewSessionDialog'
 import SettingsModal from './components/modals/SettingsModal'
@@ -18,6 +20,7 @@ export default function App() {
 
   // Register global pi event listeners (routes to correct tab by sessionId)
   usePiEvents()
+  useUpdateEvents()
 
   const loadSessions = useCallback(async () => {
     try {
@@ -60,6 +63,7 @@ export default function App() {
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <TabBar />
+        <UpdateBanner />
         <div className="flex flex-1 overflow-hidden">
           <ChatPane />
           <DiffPane />

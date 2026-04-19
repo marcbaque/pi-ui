@@ -9,7 +9,11 @@ import { homedir } from 'os'
 import { SessionStore } from './session-store'
 import type { PiEventName, PiEventPayloads } from '@shared/types'
 
+import type { UpdateService } from './update-service'
+
 export class IpcBridge {
+  private updater: UpdateService | null = null
+
   constructor(
     private readonly win: BrowserWindow,
     private readonly auth: AuthService,
@@ -20,6 +24,10 @@ export class IpcBridge {
     private readonly store: SessionStore
   ) {}
 
+  setUpdater(updater: UpdateService | null): void {
+    this.updater = updater
+  }
+
   register(): void {
     this.registerConfig()
     this.registerModels()
@@ -27,6 +35,7 @@ export class IpcBridge {
     this.registerDialog()
     this.registerShell()
     this.registerHistory()
+    this.registerUpdate()
   }
 
   // Safe wrapper: removes any existing handler before registering.
@@ -196,6 +205,16 @@ export class IpcBridge {
         console.error('[session:resume]', err)
         throw err
       }
+    })
+  }
+
+  private registerUpdate(): void {
+    this.handle('update:check', async () => {
+      await this.updater?.checkForUpdates()
+    })
+
+    this.handle('update:install', () => {
+      this.updater?.install()
     })
   }
 }

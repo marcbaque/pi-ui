@@ -305,3 +305,44 @@ describe('diff pane', () => {
     expect(getStore().tabs.tabs.find((t) => t.id === 'tab-diff-1')!.diffComments).toHaveLength(0)
   })
 })
+
+describe('update state', () => {
+  beforeEach(resetStore)
+
+  it('starts with idle status and no version', () => {
+    expect(getStore().ui.updateStatus).toBe('idle')
+    expect(getStore().ui.updateVersion).toBeNull()
+    expect(getStore().ui.updateProgress).toBeNull()
+    expect(getStore().ui.updateError).toBeNull()
+  })
+
+  it('setUpdateStatus transitions to checking', () => {
+    getStore().setUpdateStatus('checking')
+    expect(getStore().ui.updateStatus).toBe('checking')
+  })
+
+  it('setUpdateStatus stores version on available', () => {
+    getStore().setUpdateStatus('available', '1.2.0')
+    expect(getStore().ui.updateStatus).toBe('available')
+    expect(getStore().ui.updateVersion).toBe('1.2.0')
+  })
+
+  it('setUpdateStatus stores progress on downloading', () => {
+    getStore().setUpdateStatus('downloading', '1.2.0', 42)
+    expect(getStore().ui.updateStatus).toBe('downloading')
+    expect(getStore().ui.updateProgress).toBe(42)
+  })
+
+  it('setUpdateStatus stores error message', () => {
+    getStore().setUpdateStatus('error', undefined, null, 'network timeout')
+    expect(getStore().ui.updateStatus).toBe('error')
+    expect(getStore().ui.updateError).toBe('network timeout')
+  })
+
+  it('setUpdateStatus to ready clears progress', () => {
+    getStore().setUpdateStatus('downloading', '1.2.0', 80)
+    getStore().setUpdateStatus('ready', '1.2.0', null)
+    expect(getStore().ui.updateStatus).toBe('ready')
+    expect(getStore().ui.updateProgress).toBeNull()
+  })
+})

@@ -154,3 +154,29 @@ export async function emitEditToolCall(
   await emitToolStart(page, sessionId, 'tool-edit-1', 'edit', { path: filePath })
   await emitToolEnd(page, sessionId, 'tool-edit-1', 'edit', result)
 }
+
+// ── Update event helpers ──────────────────────────────────────────────────────
+
+export async function emitUpdateChecking(page: Page): Promise<void> {
+  await page.evaluate(() => (window as any).__mockPi?.emitUpdateChecking())
+}
+
+export async function emitUpdateAvailable(page: Page, version: string): Promise<void> {
+  await page.evaluate(({ v }) => (window as any).__mockPi?.emitUpdateAvailable(v), { v: version })
+}
+
+export async function emitUpdateNotAvailable(page: Page, version: string): Promise<void> {
+  await page.evaluate(({ v }) => (window as any).__mockPi?.emitUpdateNotAvailable(v), { v: version })
+}
+
+export async function emitUpdateProgress(page: Page, percent: number): Promise<void> {
+  await page.evaluate(({ p }) => (window as any).__mockPi?.emitUpdateProgress(p), { p: percent })
+}
+
+export async function emitUpdateReady(page: Page, version: string): Promise<void> {
+  await page.evaluate(({ v }) => (window as any).__mockPi?.emitUpdateReady(v), { v: version })
+}
+
+export async function emitUpdateError(page: Page, message: string): Promise<void> {
+  await page.evaluate(({ m }) => (window as any).__mockPi?.emitUpdateError(m), { m: message })
+}

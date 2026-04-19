@@ -72,6 +72,7 @@ jobs:
         run: pnpm dist
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
@@ -79,6 +80,7 @@ jobs:
           files: |
             dist/*.dmg
             dist/*.zip
+            dist/latest-mac.yml
           generate_release_notes: true
 
   release-windows:
@@ -105,6 +107,7 @@ jobs:
         run: pnpm dist:win
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
@@ -112,6 +115,7 @@ jobs:
           files: |
             dist/*.exe
             dist/*.zip
+            dist/latest.yml
           generate_release_notes: false
 
   changelog:

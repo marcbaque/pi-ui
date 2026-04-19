@@ -1,6 +1,6 @@
 {
   "name": "pi-ui",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "Desktop UI for the pi coding agent",
   "main": "out/main/index.js",
   "type": "module",
@@ -43,6 +43,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "electron-updater": "^6.8.3",
     "immer": "^11.1.4",
     "lucide-react": "^1.8.0",
     "react": "^19.2.5",
@@ -144,6 +145,15 @@
     "files": [
       "out/**/*",
       "package.json"
-    ]
+    ],
+    "publish": {
+      "provider": "github",
+      "owner": "marcbaque",
+      "repo": "pi-ui"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marcbaque/pi-ui.git"
   }
 }

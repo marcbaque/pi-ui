@@ -23,11 +23,18 @@ interface MockPiControl {
   emitError(sessionId: string, message: string): void
   getLastSessionId(): string
   getSessions(): import('../../shared/types').SessionSummary[]
+  emitUpdateChecking(): void
+  emitUpdateAvailable(version: string): void
+  emitUpdateNotAvailable(version: string): void
+  emitUpdateProgress(percent: number): void
+  emitUpdateReady(version: string): void
+  emitUpdateError(message: string): void
 }
 
 declare global {
   interface Window {
     pi: PiAPI
     __mockPi?: MockPiControl
+    __APP_VERSION__?: string
   }
 }

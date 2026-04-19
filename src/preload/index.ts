@@ -146,6 +146,10 @@ if (process.env['PI_E2E']) {
         handlers.get(event)?.delete(handler as (payload: unknown) => void)
       }
     },
+    update: {
+      check: async () => {},
+      install: async () => {},
+    },
   }
 
   const mockControl = {
@@ -178,6 +182,18 @@ if (process.env['PI_E2E']) {
     emitError: (sessionId: string, message: string) => emit('pi:error', { sessionId, message }),
     getLastSessionId: () => `test-session-${sessionCounter}`,
     getSessions: () => MOCK_SESSIONS,
+    emitUpdateChecking: () => emit('update:checking', {}),
+    emitUpdateAvailable: (version: string) => emit('update:available', { version }),
+    emitUpdateNotAvailable: (version: string) => emit('update:not-available', { version }),
+    emitUpdateProgress: (percent: number) =>
+      emit('update:progress', {
+        percent,
+        bytesPerSecond: 1000000,
+        transferred: percent * 1000,
+        total: 100000,
+      }),
+    emitUpdateReady: (version: string) => emit('update:ready', { version }),
+    emitUpdateError: (message: string) => emit('update:error', { message }),
   }
 
   contextBridge.exposeInMainWorld('pi', mockApi)
@@ -219,6 +235,10 @@ if (process.env['PI_E2E']) {
         handler(payload)
       ipcRenderer.on(event, listener)
       return () => ipcRenderer.removeListener(event, listener)
+    },
+    update: {
+      check: () => ipcRenderer.invoke('update:check'),
+      install: () => ipcRenderer.invoke('update:install'),
     },
   }
 
