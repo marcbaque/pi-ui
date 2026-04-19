@@ -114,7 +114,8 @@
           ]
         }
       ],
-      "icon": "build/icon.icns"
+      "icon": "build/icon.icns",
+      "x64ArchFiles": "**/koffi/**"
     },
     "win": {
       "target": [
