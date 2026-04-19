@@ -104,6 +104,7 @@ if (process.env['PI_E2E']) {
       abort: async (sessionId) => {
         emit('pi:idle', { sessionId })
       },
+      close: async () => {},
     },
     config: {
       get: async () => ({
@@ -172,6 +173,7 @@ if (process.env['PI_E2E']) {
       create: (opts) => ipcRenderer.invoke('session:create', opts),
       send: (sessionId, message) => ipcRenderer.invoke('session:send', { sessionId, message }),
       abort: (sessionId) => ipcRenderer.invoke('session:abort', { sessionId }),
+      close: (sessionId) => ipcRenderer.invoke('session:close', { sessionId }),
     },
     config: {
       get: () => ipcRenderer.invoke('config:get'),

@@ -112,6 +112,7 @@ export interface PiAPI {
     }): Promise<{ sessionId: string }>
     send(sessionId: string, message: string): Promise<void>
     abort(sessionId: string): Promise<void>
+    close(sessionId: string): Promise<void>
   }
   config: {
     get(): Promise<AppConfig>
