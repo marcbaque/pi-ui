@@ -27,8 +27,14 @@ export class IpcBridge {
     this.registerDialog()
     this.registerShell()
     this.registerHistory()
-    // Debug: expose active session list
     this.handle('debug:sessions', () => this.sessions.getActiveSessionIds())
+  }
+
+  log(...args: unknown[]): void {
+    console.log(...args)
+    if (!this.win.isDestroyed()) {
+      this.win.webContents.send('debug:log', { msg: args.map(String).join(' ') })
+    }
   }
 
   // Safe wrapper: removes any existing handler before registering.
@@ -90,10 +96,14 @@ export class IpcBridge {
     this.handle(
       'session:send',
       async (_e, { sessionId, message }: { sessionId: string; message: string }) => {
+        this.log(
+          `[session:send] sessionId=${sessionId} known=${this.sessions.getActiveSessionIds().join(',')}`
+        )
         try {
           await this.sessions.send(sessionId, message)
+          this.log(`[session:send] prompt completed sessionId=${sessionId}`)
         } catch (err) {
-          console.error('[session:send]', err)
+          this.log(`[session:send] ERROR: ${err}`)
           throw err
         }
       }
@@ -166,6 +176,7 @@ export class IpcBridge {
           this.models,
           (event, payload) => this.sendToRenderer(event, payload)
         )
+        this.log(`[session:resume] sessionId=${sessionId}`)
         const manager = (sdkSession as { sessionManager?: { getSessionId(): string } })
           .sessionManager
         const sdkSessionId = manager?.getSessionId() ?? sessionId
@@ -173,11 +184,15 @@ export class IpcBridge {
           sessionId,
           sdkSession,
           sdkSessionId,
-          (event, payload) => this.sendToRenderer(event, payload)
+          (event, payload) => {
+            this.log(`[resume:event] ${event}`)
+            this.sendToRenderer(event, payload)
+          }
         )
+        this.log(`[session:resume] registered, returning sessionId=${sessionId}`)
         return { sessionId }
       } catch (err) {
-        console.error('[session:resume] failed:', err)
+        this.log(`[session:resume] ERROR: ${err}`)
         throw err
       }
     })

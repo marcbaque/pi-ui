@@ -184,7 +184,16 @@ if (process.env['PI_E2E']) {
       create: (opts) => ipcRenderer.invoke('session:create', opts),
       send: (sessionId, message) => {
         console.log('[preload] session:send', sessionId)
-        return ipcRenderer.invoke('session:send', { sessionId, message })
+        return ipcRenderer
+          .invoke('session:send', { sessionId, message })
+          .then((r) => {
+            console.log('[preload] session:send resolved', sessionId)
+            return r
+          })
+          .catch((e: Error) => {
+            console.error('[preload] session:send REJECTED', e.message)
+            throw e
+          })
       },
       abort: (sessionId) => ipcRenderer.invoke('session:abort', { sessionId }),
       close: (sessionId) => ipcRenderer.invoke('session:close', { sessionId }),
@@ -228,4 +237,6 @@ if (process.env['PI_E2E']) {
   contextBridge.exposeInMainWorld('piDebug', {
     sessions: () => ipcRenderer.invoke('debug:sessions'),
   })
+  // Forward main-process debug logs to renderer console
+  ipcRenderer.on('debug:log', (_e, { msg }: { msg: string }) => console.log('[main]', msg))
 }
