@@ -9,14 +9,13 @@ import type { SessionSummary } from '@shared/types'
 export default function SessionList() {
   const sessions = useStore((s) => s.history.sessions)
   const expandedCwds = useStore((s) => s.history.expandedCwds)
-  const selectedSessionId = useStore((s) => s.history.selectedSessionId)
   const toggleCwdExpanded = useStore((s) => s.toggleCwdExpanded)
-  const selectSession = useStore((s) => s.selectSession)
-  const setLoadStatus = useStore((s) => s.setLoadStatus)
-  const setLoadedMessages = useStore((s) => s.setLoadedMessages)
   const setSessions = useStore((s) => s.setSessions)
-
-  const clearReadonly = useStore((s) => s.clearReadonly)
+  const tabs = useStore((s) => s.tabs.tabs)
+  const createTab = useStore((s) => s.createTab)
+  const setActiveTab = useStore((s) => s.setActiveTab)
+  const setTabMessages = useStore((s) => s.setTabMessages)
+  const setTabMode = useStore((s) => s.setTabMode)
 
   const [query, setQuery] = useState('')
 
@@ -55,13 +54,37 @@ export default function SessionList() {
   }
 
   async function handleSelectSession(session: SessionSummary) {
-    selectSession(session.id)
-    setLoadStatus('loading')
+    // Deduplication: if a tab already has this session open, just focus it
+    const existing = tabs.find(
+      (t) => t.readonlySessionId === session.id || t.sessionId === session.id
+    )
+    if (existing) {
+      setActiveTab(existing.id)
+      return
+    }
+
+    // Create a loading tab
+    const tabId = crypto.randomUUID()
+    createTab({
+      id: tabId,
+      sessionId: tabId,
+      cwd: session.cwd,
+      model: session.model ?? '',
+      provider: '',
+      thinkingLevel: 'off',
+      status: 'idle',
+      messages: [],
+      currentStreamingContent: '',
+      mode: 'loading',
+      readonlySessionId: session.id,
+    })
+
     try {
       const messages = await window.pi.sessions.load(session.path)
-      setLoadedMessages(messages)
+      setTabMessages(tabId, messages)
+      setTabMode(tabId, 'readonly')
     } catch {
-      setLoadStatus('error')
+      setTabMode(tabId, 'error')
     }
   }
 
@@ -78,7 +101,6 @@ export default function SessionList() {
 
   async function handleDelete(session: SessionSummary) {
     await window.pi.sessions.delete(session.id)
-    if (selectedSessionId === session.id) clearReadonly()
     const updated = await window.pi.sessions.list()
     setSessions(updated)
   }
@@ -107,7 +129,11 @@ export default function SessionList() {
             cwd={g.cwd}
             sessions={g.sessions}
             expanded={isExpanded(g.slug)}
-            selectedSessionId={selectedSessionId}
+            selectedSessionId={
+              tabs.find((t) => t.readonlySessionId != null)?.readonlySessionId ??
+              tabs.find((t) => t.mode === 'active')?.sessionId ??
+              null
+            }
             onToggle={() => toggleCwdExpanded(g.slug)}
             onSelectSession={handleSelectSession}
             onRenameSession={handleRename}

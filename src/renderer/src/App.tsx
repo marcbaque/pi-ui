@@ -1,7 +1,9 @@
 // src/renderer/src/App.tsx
 import { useEffect, useCallback } from 'react'
 import { useStore } from './store'
+import { usePiEvents } from './hooks/usePiEvents'
 import Sidebar from './components/sidebar/Sidebar'
+import TabBar from './components/tabs/TabBar'
 import ChatPane from './components/chat/ChatPane'
 import NewSessionDialog from './components/modals/NewSessionDialog'
 import SettingsModal from './components/modals/SettingsModal'
@@ -11,8 +13,10 @@ export default function App() {
   const setModels = useStore((s) => s.setModels)
   const openSettings = useStore((s) => s.openSettings)
   const setSessions = useStore((s) => s.setSessions)
-  const sessionActive = useStore((s) => s.session.active)
-  const sessionId = useStore((s) => s.session.sessionId)
+  const tabCount = useStore((s) => s.tabs.tabs.length)
+
+  // Register global pi event listeners (routes to correct tab by sessionId)
+  usePiEvents()
 
   const loadSessions = useCallback(async () => {
     try {
@@ -34,12 +38,10 @@ export default function App() {
     loadSessions()
   }, [setConfig, setModels, loadSessions])
 
-  // Refresh sessions after a new session becomes active
+  // Refresh sessions list whenever a tab is opened or closed
   useEffect(() => {
-    if (sessionActive) {
-      loadSessions()
-    }
-  }, [sessionActive, sessionId, loadSessions])
+    loadSessions()
+  }, [tabCount, loadSessions])
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -55,7 +57,10 @@ export default function App() {
   return (
     <div className="flex h-screen overflow-hidden bg-background text-foreground">
       <Sidebar />
-      <ChatPane />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <TabBar />
+        <ChatPane />
+      </div>
       <NewSessionDialog />
       <SettingsModal />
     </div>
