@@ -31,7 +31,7 @@ export default function ResumeBar({ tabId }: Props) {
         provider: '',
         thinkingLevel: 'off',
         status: 'idle',
-        messages: [],
+        messages: tab.messages,
         currentStreamingContent: '',
         mode: 'active',
       })
