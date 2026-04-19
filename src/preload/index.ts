@@ -182,19 +182,7 @@ if (process.env['PI_E2E']) {
   const api: PiAPI = {
     session: {
       create: (opts) => ipcRenderer.invoke('session:create', opts),
-      send: (sessionId, message) => {
-        console.log('[preload] session:send', sessionId)
-        return ipcRenderer
-          .invoke('session:send', { sessionId, message })
-          .then((r) => {
-            console.log('[preload] session:send resolved', sessionId)
-            return r
-          })
-          .catch((e: Error) => {
-            console.error('[preload] session:send REJECTED', e.message)
-            throw e
-          })
-      },
+      send: (sessionId, message) => ipcRenderer.invoke('session:send', { sessionId, message }),
       abort: (sessionId) => ipcRenderer.invoke('session:abort', { sessionId }),
       close: (sessionId) => ipcRenderer.invoke('session:close', { sessionId }),
     },
@@ -218,25 +206,15 @@ if (process.env['PI_E2E']) {
         ipcRenderer.invoke('sessions:updateMeta', { sessionId, patch }),
       delete: (sessionId) => ipcRenderer.invoke('sessions:delete', { sessionId }),
       load: (sessionPath) => ipcRenderer.invoke('session:load', { sessionPath }),
-      resume: (sessionPath) => {
-        console.log('[preload] session:resume', sessionPath)
-        return ipcRenderer.invoke('session:resume', { sessionPath })
-      },
+      resume: (sessionPath) => ipcRenderer.invoke('session:resume', { sessionPath }),
     },
     on: <E extends PiEventName>(event: E, handler: (payload: PiEventPayloads[E]) => void) => {
-      const listener = (_: import('electron').IpcRendererEvent, payload: PiEventPayloads[E]) => {
-        console.log('[preload] ipc event received:', event, JSON.stringify(payload).slice(0, 80))
+      const listener = (_: import('electron').IpcRendererEvent, payload: PiEventPayloads[E]) =>
         handler(payload)
-      }
       ipcRenderer.on(event, listener)
       return () => ipcRenderer.removeListener(event, listener)
     },
   }
 
   contextBridge.exposeInMainWorld('pi', api)
-  contextBridge.exposeInMainWorld('piDebug', {
-    sessions: () => ipcRenderer.invoke('debug:sessions'),
-  })
-  // Forward main-process debug logs to renderer console
-  ipcRenderer.on('debug:log', (_e, { msg }: { msg: string }) => console.log('[main]', msg))
 }

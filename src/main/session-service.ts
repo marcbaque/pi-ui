@@ -39,9 +39,7 @@ export class SessionService {
     session: SdkSession,
     onEvent: EventCallback
   ): () => void {
-    console.log(`[subscribeSession] subscribing sessionId=${sessionId}`)
     return session.subscribe((event) => {
-      console.log(`[subscribeSession] event sessionId=${sessionId} type=${event.type}`)
       if (event.type === 'message_update' && event.assistantMessageEvent.type === 'text_delta') {
         onEvent('pi:token', { sessionId, delta: event.assistantMessageEvent.delta })
       } else if (event.type === 'tool_execution_start') {

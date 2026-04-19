@@ -141,7 +141,6 @@ export class SessionStore {
         : modelId
           ? modelService.findModelById(modelId)
           : undefined
-    console.log(`[SessionStore.resume] modelId=${modelId} provider=${provider} found=${!!model}`)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const opts: any = { cwd, resourceLoader: loader, sessionManager: manager }
     if (model) opts.model = model
