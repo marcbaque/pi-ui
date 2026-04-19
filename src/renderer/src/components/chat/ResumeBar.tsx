@@ -2,28 +2,39 @@
 import { useState } from 'react'
 import { useStore } from '@/store'
 
-export default function ResumeBar() {
-  const history = useStore((s) => s.history)
-  const setSessionActive = useStore((s) => s.setSessionActive)
-  const clearReadonly = useStore((s) => s.clearReadonly)
+interface Props {
+  tabId: string
+}
+
+export default function ResumeBar({ tabId }: Props) {
+  const tabs = useStore((s) => s.tabs.tabs)
+  const replaceTab = useStore((s) => s.replaceTab)
   const setSessions = useStore((s) => s.setSessions)
   const [loading, setLoading] = useState(false)
 
-  const session = history.sessions.find((s) => s.id === history.selectedSessionId)
+  const tab = tabs.find((t) => t.id === tabId)
+  const historySessions = useStore((s) => s.history.sessions)
+  const session = tab?.readonlySessionId
+    ? historySessions.find((s) => s.id === tab.readonlySessionId)
+    : null
 
   async function handleResume() {
-    if (!session) return
+    if (!tab || !session) return
     setLoading(true)
     try {
       const { sessionId } = await window.pi.sessions.resume(session.path)
-      setSessionActive({
+      replaceTab(tabId, {
+        id: sessionId,
         sessionId,
         cwd: session.cwd,
         model: session.model ?? '',
         provider: '',
         thinkingLevel: 'off',
+        status: 'idle',
+        messages: [],
+        currentStreamingContent: '',
+        mode: 'active',
       })
-      clearReadonly()
       const updated = await window.pi.sessions.list()
       setSessions(updated)
     } catch (err) {

@@ -17,41 +17,38 @@ function resetStore() {
   useStore.setState((useStore as unknown as { getInitialState: () => object }).getInitialState())
 }
 
+const MOCK_TAB = {
+  id: 's1',
+  sessionId: 's1',
+  cwd: '/code',
+  model: 'claude',
+  provider: 'anthropic',
+  thinkingLevel: 'low' as const,
+  status: 'idle' as const,
+  messages: [],
+  currentStreamingContent: '',
+  mode: 'active' as const,
+}
+
 describe('ChatPane', () => {
   beforeEach(() => {
     resetStore()
     vi.clearAllMocks()
   })
 
-  it('shows empty state when no session is active', () => {
+  it('shows empty state when no tabs are open', () => {
     render(<ChatPane />)
     expect(screen.getByText(/no active session/i)).toBeInTheDocument()
   })
 
-  it('shows the message input when a session is active', () => {
-    useStore
-      .getState()
-      .setSessionActive({
-        sessionId: 's1',
-        cwd: '/code',
-        model: 'claude',
-        provider: 'anthropic',
-        thinkingLevel: 'low',
-      })
+  it('shows the message input when an active tab exists', () => {
+    useStore.getState().createTab(MOCK_TAB)
     render(<ChatPane />)
     expect(screen.getByPlaceholderText(/send a message/i)).toBeInTheDocument()
   })
 
   it('sends a message on Enter and clears the input', async () => {
-    useStore
-      .getState()
-      .setSessionActive({
-        sessionId: 's1',
-        cwd: '/code',
-        model: 'claude',
-        provider: 'anthropic',
-        thinkingLevel: 'low',
-      })
+    useStore.getState().createTab(MOCK_TAB)
     render(<ChatPane />)
     const input = screen.getByPlaceholderText(/send a message/i)
     fireEvent.change(input, { target: { value: 'hello pi' } })
@@ -61,15 +58,7 @@ describe('ChatPane', () => {
   })
 
   it('does not send on Shift+Enter', () => {
-    useStore
-      .getState()
-      .setSessionActive({
-        sessionId: 's1',
-        cwd: '/code',
-        model: 'claude',
-        provider: 'anthropic',
-        thinkingLevel: 'low',
-      })
+    useStore.getState().createTab(MOCK_TAB)
     render(<ChatPane />)
     const input = screen.getByPlaceholderText(/send a message/i)
     fireEvent.change(input, { target: { value: 'draft' } })
@@ -78,16 +67,8 @@ describe('ChatPane', () => {
   })
 
   it('shows Stop button while thinking and calls abort', async () => {
-    useStore
-      .getState()
-      .setSessionActive({
-        sessionId: 's1',
-        cwd: '/code',
-        model: 'claude',
-        provider: 'anthropic',
-        thinkingLevel: 'low',
-      })
-    useStore.getState().setSessionStatus('thinking')
+    useStore.getState().createTab(MOCK_TAB)
+    useStore.getState().setTabStatus('s1', 'thinking')
     render(<ChatPane />)
     const stop = screen.getByRole('button', { name: /stop/i })
     fireEvent.click(stop)
@@ -95,16 +76,8 @@ describe('ChatPane', () => {
   })
 
   it('renders user messages', () => {
-    useStore
-      .getState()
-      .setSessionActive({
-        sessionId: 's1',
-        cwd: '/code',
-        model: 'claude',
-        provider: 'anthropic',
-        thinkingLevel: 'low',
-      })
-    useStore.getState().addUserMessage('hello')
+    useStore.getState().createTab(MOCK_TAB)
+    useStore.getState().addUserMessage('s1', 'hello')
     render(<ChatPane />)
     expect(screen.getByText('hello')).toBeInTheDocument()
   })

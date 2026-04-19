@@ -1,6 +1,7 @@
 // src/renderer/src/components/chat/ToolCallEntry.tsx
 import { useState } from 'react'
 import type { ToolCall } from '@shared/types'
+import { isDiff, sliceHunk } from '@/lib/diff-utils'
 
 interface Props {
   call: ToolCall
@@ -60,7 +61,6 @@ function BashOutput({ result, expanded }: { result: string; expanded: boolean })
 }
 
 // ── Edit diff: coloured unified diff with context ────────────────────────────
-const DIFF_CONTEXT = 4
 
 function lineColor(line: string): string {
   if (line.startsWith('+') && !line.startsWith('+++')) return '#b5bd68' // green
@@ -68,50 +68,6 @@ function lineColor(line: string): string {
   if (line.startsWith('@@')) return 'var(--pi-accent)'
   if (line.startsWith('---') || line.startsWith('+++')) return 'var(--pi-dim)'
   return 'var(--pi-dim)'
-}
-
-function isDiff(result: string): boolean {
-  return result.includes('\n+') || result.includes('\n-') || result.startsWith('---')
-}
-
-/**
- * If the result is NOT already a unified diff, treat every line as context
- * and just render it dimmed. If it IS a diff, slice each hunk to ±DIFF_CONTEXT
- * lines around the changed lines.
- */
-function sliceHunk(lines: string[]): string[] {
-  // Find indices of changed lines
-  const changed = new Set<number>()
-  lines.forEach((l, i) => {
-    if (
-      (l.startsWith('+') && !l.startsWith('+++')) ||
-      (l.startsWith('-') && !l.startsWith('---'))
-    ) {
-      changed.add(i)
-    }
-  })
-  if (changed.size === 0) return lines
-
-  // Expand each changed index by DIFF_CONTEXT
-  const keep = new Set<number>()
-  changed.forEach((idx) => {
-    for (let d = -DIFF_CONTEXT; d <= DIFF_CONTEXT; d++) {
-      const j = idx + d
-      if (j >= 0 && j < lines.length) keep.add(j)
-    }
-  })
-
-  // Rebuild with gap markers
-  const result: string[] = []
-  let prev = -1
-  Array.from(keep)
-    .sort((a, b) => a - b)
-    .forEach((i) => {
-      if (prev !== -1 && i > prev + 1) result.push('…')
-      result.push(lines[i])
-      prev = i
-    })
-  return result
 }
 
 function DiffOutput({ result }: { result: string }) {
@@ -157,7 +113,7 @@ export default function ToolCallEntry({ call }: Props) {
   const isEdit = EDIT_TOOLS.has(call.toolName)
 
   const [expanded, setExpanded] = useState(false)
-  const canToggle = hasResult
+  const canToggle = hasResult && (isBash || !isEdit)
 
   return (
     <div

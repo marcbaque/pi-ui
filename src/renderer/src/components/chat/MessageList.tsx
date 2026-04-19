@@ -48,9 +48,9 @@ function AssistantMessage({ content, streaming }: { content: string; streaming?:
 }
 
 export default function MessageList({ readonlyMessages }: Props = {}) {
-  const session = useStore((s) => s.session)
-  const messages = readonlyMessages ?? session.messages
-  const streamingContent = readonlyMessages ? '' : session.currentStreamingContent
+  const tab = useStore((s) => s.tabs.tabs.find((t) => t.id === s.tabs.activeTabId))
+  const messages = readonlyMessages ?? tab?.messages ?? []
+  const streamingContent = readonlyMessages ? '' : (tab?.currentStreamingContent ?? '')
   const scrollRef = useAutoScroll<HTMLDivElement>(messages.length + streamingContent.length)
 
   return (

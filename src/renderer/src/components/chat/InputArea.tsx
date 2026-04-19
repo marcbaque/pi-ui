@@ -1,28 +1,33 @@
 // src/renderer/src/components/chat/InputArea.tsx
 import { useState, useRef, type KeyboardEvent } from 'react'
 import { useStore } from '@/store'
+import { useActiveTab } from '@/hooks/useActiveTab'
 import { Button } from '@/components/ui/button'
 
 export default function InputArea() {
-  const session = useStore((s) => s.session)
+  const tab = useActiveTab()
   const addUserMessage = useStore((s) => s.addUserMessage)
+  const setTabStatus = useStore((s) => s.setTabStatus)
+  const homedir = useStore((s) => s.config.homedir)
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const thinking = session.status === 'thinking'
-  const setSessionStatus = useStore((s) => s.setSessionStatus)
-  const homedir = useStore((s) => s.config.homedir)
+
+  if (!tab || tab.mode !== 'active') return null
+
+  const thinking = tab.status === 'thinking'
 
   async function send() {
+    if (!tab) return
     const msg = value.trim()
-    if (!msg || !session.sessionId) return
+    if (!msg || !tab.sessionId) return
     setValue('')
-    addUserMessage(msg)
-    setSessionStatus('thinking')
+    addUserMessage(tab.id, msg)
+    setTabStatus(tab.id, 'thinking')
     try {
-      await window.pi.session.send(session.sessionId, msg)
+      await window.pi.session.send(tab.sessionId, msg)
     } catch (err) {
       console.error('[send]', err)
-      setSessionStatus('error')
+      setTabStatus(tab.id, 'error')
     }
   }
 
@@ -34,8 +39,8 @@ export default function InputArea() {
   }
 
   async function handleAbort() {
-    if (!session.sessionId) return
-    await window.pi.session.abort(session.sessionId)
+    if (!tab?.sessionId) return
+    await window.pi.session.abort(tab.sessionId)
   }
 
   return (
@@ -52,7 +57,7 @@ export default function InputArea() {
           placeholder={
             thinking
               ? 'pi is working…'
-              : session.status === 'error'
+              : tab.status === 'error'
                 ? 'Something went wrong — try again'
                 : 'Send a message… (Enter to send, Shift+Enter for newline)'
           }
@@ -79,10 +84,11 @@ export default function InputArea() {
               data-testid="stop-btn"
               aria-label="Stop"
               size="sm"
+              variant="ghost"
               onClick={handleAbort}
-              className="h-7 border border-zinc-700 bg-zinc-800 px-2 text-zinc-400 hover:text-zinc-200"
+              className="h-7 border border-zinc-700 bg-zinc-800 px-2 text-zinc-500 hover:text-zinc-300"
             >
-              ■ Stop
+              ■
             </Button>
           </div>
         )}
@@ -95,13 +101,13 @@ export default function InputArea() {
         <span
           data-testid="status-dot"
           className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-            session.status === 'thinking' ? 'animate-pulse' : ''
+            tab.status === 'thinking' ? 'animate-pulse' : ''
           }`}
           style={{
             backgroundColor:
-              session.status === 'thinking'
+              tab.status === 'thinking'
                 ? 'var(--pi-warning)'
-                : session.status === 'error'
+                : tab.status === 'error'
                   ? 'var(--pi-error)'
                   : 'var(--pi-success)',
           }}
@@ -110,37 +116,37 @@ export default function InputArea() {
           data-testid="status-text"
           style={{
             color:
-              session.status === 'thinking'
+              tab.status === 'thinking'
                 ? 'var(--pi-warning)'
-                : session.status === 'error'
+                : tab.status === 'error'
                   ? 'var(--pi-error)'
                   : 'var(--pi-dim)',
           }}
         >
-          {session.status}
+          {tab.status}
         </span>
 
         {/* Model + thinking */}
-        {session.model && (
+        {tab.model && (
           <>
             <span style={{ color: 'var(--pi-dim-dark)' }}>·</span>
-            <span style={{ color: 'var(--pi-accent)' }}>{session.model}</span>
-            {session.thinkingLevel && session.thinkingLevel !== 'off' && (
-              <span style={{ color: 'var(--pi-dim)' }}>• {session.thinkingLevel}</span>
+            <span style={{ color: 'var(--pi-accent)' }}>{tab.model}</span>
+            {tab.thinkingLevel && tab.thinkingLevel !== 'off' && (
+              <span style={{ color: 'var(--pi-dim)' }}>• {tab.thinkingLevel}</span>
             )}
           </>
         )}
 
         {/* CWD */}
-        {session.cwd && (
+        {tab.cwd && (
           <>
             <span style={{ color: 'var(--pi-dim-dark)' }}>·</span>
             <button
-              onClick={() => window.pi.shell.openPath(session.cwd!)}
+              onClick={() => window.pi.shell.openPath(tab.cwd!)}
               className="truncate hover:underline"
               style={{ color: 'var(--pi-dim)', maxWidth: '200px' }}
             >
-              {homedir ? session.cwd.replace(homedir, '~') : session.cwd}
+              {homedir ? tab.cwd.replace(homedir, '~') : tab.cwd}
             </button>
           </>
         )}

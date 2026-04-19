@@ -1,6 +1,6 @@
 // src/renderer/src/components/chat/ChatPane.tsx
 import { useStore } from '@/store'
-import { usePiEvents } from '@/hooks/usePiEvents'
+import { useActiveTab } from '@/hooks/useActiveTab'
 import Toolbar from './Toolbar'
 import MessageList from './MessageList'
 import InputArea from './InputArea'
@@ -36,20 +36,24 @@ function ReadonlyLoadingState() {
   )
 }
 
-function ReadonlyErrorState() {
-  const setLoadStatus = useStore((s) => s.setLoadStatus)
-  const selectedId = useStore((s) => s.history.selectedSessionId)
+function ReadonlyErrorState({ tabId }: { tabId: string }) {
+  const setTabMode = useStore((s) => s.setTabMode)
+  const setTabMessages = useStore((s) => s.setTabMessages)
+  const tabs = useStore((s) => s.tabs.tabs)
 
   async function retry() {
-    if (!selectedId) return
-    const session = useStore.getState().history.sessions.find((s) => s.id === selectedId)
+    const tab = tabs.find((t) => t.id === tabId)
+    if (!tab?.readonlySessionId) return
+    const sessions = useStore.getState().history.sessions
+    const session = sessions.find((s) => s.id === tab.readonlySessionId)
     if (!session) return
-    setLoadStatus('loading')
+    setTabMode(tabId, 'loading')
     try {
       const messages = await window.pi.sessions.load(session.path)
-      useStore.getState().setLoadedMessages(messages)
+      setTabMessages(tabId, messages)
+      setTabMode(tabId, 'readonly')
     } catch {
-      setLoadStatus('error')
+      setTabMode(tabId, 'error')
     }
   }
 
@@ -67,40 +71,50 @@ function ReadonlyErrorState() {
 }
 
 export default function ChatPane() {
-  const session = useStore((s) => s.session)
-  const history = useStore((s) => s.history)
+  const tab = useActiveTab()
 
-  usePiEvents(session.sessionId)
-
-  const isReadonly = !session.active && history.selectedSessionId !== null
-
-  if (isReadonly) {
+  if (!tab) {
     return (
       <div className="flex flex-1 flex-col overflow-hidden">
-        <Toolbar />
-        {history.loadStatus === 'loading' && <ReadonlyLoadingState />}
-        {history.loadStatus === 'error' && <ReadonlyErrorState />}
-        {history.loadStatus === 'idle' && (
-          <>
-            <MessageList readonlyMessages={history.loadedMessages} />
-            <ResumeBar />
-          </>
-        )}
+        <EmptyState />
       </div>
     )
   }
 
+  if (tab.mode === 'loading') {
+    return (
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Toolbar />
+        <ReadonlyLoadingState />
+      </div>
+    )
+  }
+
+  if (tab.mode === 'error') {
+    return (
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Toolbar />
+        <ReadonlyErrorState tabId={tab.id} />
+      </div>
+    )
+  }
+
+  if (tab.mode === 'readonly') {
+    return (
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <Toolbar />
+        <MessageList readonlyMessages={tab.messages} />
+        <ResumeBar tabId={tab.id} />
+      </div>
+    )
+  }
+
+  // mode === 'active'
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <Toolbar />
-      {session.active ? (
-        <>
-          <MessageList />
-          <InputArea />
-        </>
-      ) : (
-        <EmptyState />
-      )}
+      <MessageList />
+      <InputArea />
     </div>
   )
 }

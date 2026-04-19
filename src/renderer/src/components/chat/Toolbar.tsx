@@ -1,6 +1,7 @@
 // src/renderer/src/components/chat/Toolbar.tsx
 import { cn } from '@/lib/utils'
 import { useStore } from '@/store'
+import { useActiveTab } from '@/hooks/useActiveTab'
 import {
   Select,
   SelectContent,
@@ -13,27 +14,35 @@ import type { AppThinkingLevel } from '@shared/types'
 const LEVELS: AppThinkingLevel[] = ['off', 'low', 'high']
 
 export default function Toolbar() {
-  const session = useStore((s) => s.session)
+  const tab = useActiveTab()
   const config = useStore((s) => s.config)
-  const setSessionActive = useStore((s) => s.setSessionActive)
+  const replaceTab = useStore((s) => s.replaceTab)
 
-  if (!session.active) return null
+  if (!tab) return null
 
   async function handleModelChange(val: string) {
+    if (!tab) return
     const [p, ...rest] = val.split('/')
     const m = rest.join('/')
     try {
-      await window.pi.session.send(session.sessionId!, `/model ${p}/${m}`)
-      setSessionActive({
-        sessionId: session.sessionId!,
-        cwd: session.cwd!,
-        model: m,
-        provider: p,
-        thinkingLevel: session.thinkingLevel,
-      })
+      await window.pi.session.send(tab.sessionId, `/model ${p}/${m}`)
+      replaceTab(tab.id, { ...tab, model: m, provider: p })
     } catch (err) {
       console.error(err)
     }
+  }
+
+  // Readonly / loading tabs: show plain text, no dropdowns
+  if (tab.mode !== 'active') {
+    return (
+      <div
+        data-testid="chat-toolbar"
+        className="flex items-center gap-3 border-b border-[var(--pi-border-subtle)] bg-[var(--pi-sidebar-bg)] px-3 py-2"
+      >
+        <span className="text-xs text-zinc-500">{tab.model || '—'}</span>
+        <span className="ml-auto max-w-[200px] truncate text-xs text-zinc-600">{tab.cwd}</span>
+      </div>
+    )
   }
 
   return (
@@ -41,7 +50,7 @@ export default function Toolbar() {
       data-testid="chat-toolbar"
       className="flex items-center gap-3 border-b border-[var(--pi-border-subtle)] bg-[var(--pi-sidebar-bg)] px-3 py-2"
     >
-      <Select value={`${session.provider}/${session.model}`} onValueChange={handleModelChange}>
+      <Select value={`${tab.provider}/${tab.model}`} onValueChange={handleModelChange}>
         <SelectTrigger className="h-7 w-48 border-zinc-800 bg-zinc-900 text-zinc-400">
           <SelectValue />
         </SelectTrigger>
@@ -67,7 +76,7 @@ export default function Toolbar() {
             key={level}
             className={cn(
               'px-2 py-0.5 capitalize transition-colors',
-              session.thinkingLevel === level
+              tab.thinkingLevel === level
                 ? 'bg-[var(--pi-tool-success-bg)] text-[var(--pi-accent)]'
                 : 'text-zinc-600 hover:text-zinc-400'
             )}
@@ -78,10 +87,10 @@ export default function Toolbar() {
       </div>
 
       <button
-        onClick={() => session.cwd && window.pi.shell.openPath(session.cwd)}
+        onClick={() => tab.cwd && window.pi.shell.openPath(tab.cwd)}
         className="ml-auto max-w-[200px] truncate text-zinc-600 transition-colors hover:text-zinc-400"
       >
-        {session.cwd}
+        {tab.cwd}
       </button>
     </div>
   )
