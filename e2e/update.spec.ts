@@ -15,6 +15,12 @@ test('update banner is hidden on startup', async ({ page }) => {
   await expect(updateBanner.root(page)).not.toBeVisible()
 })
 
+test('update banner is hidden while checking', async ({ page }) => {
+  await emitUpdateChecking(page)
+  // checking state is transient — banner should stay hidden (only visible when available/ready/error)
+  await expect(updateBanner.root(page)).not.toBeVisible()
+})
+
 test('update banner appears when update is available (downloading)', async ({ page }) => {
   await emitUpdateChecking(page)
   await emitUpdateAvailable(page, '1.2.0')

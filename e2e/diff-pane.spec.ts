@@ -32,6 +32,18 @@ test('diff pane shows file path', async ({ page }) => {
   await expect(diffPane.path(page)).toHaveText('auth.ts')
 })
 
+test('diff pane shows diff content with added and removed lines', async ({ page }) => {
+  const sid = await startSession(page)
+  await emitWriteToolCall(page, sid, 'src/auth.ts')
+  // The sample diff has a removed line (-import { legacy }) and added lines (+import { logger }, +import { metrics })
+  await expect(diffPane.diffView(page)).toBeVisible()
+  // Check that some diff lines are rendered
+  const diffLines = page.locator('[data-testid^="diff-line-"]')
+  await expect(diffLines.first()).toBeVisible()
+  const count = await diffLines.count()
+  expect(count).toBeGreaterThan(3)
+})
+
 test('diff pane replaces content when a new write/edit tool call completes', async ({ page }) => {
   const sid = await startSession(page)
   await emitWriteToolCall(page, sid, 'src/auth.ts')
