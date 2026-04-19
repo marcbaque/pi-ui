@@ -68,6 +68,13 @@ if (process.env['PI_E2E']) {
     shell: {
       openPath: async () => {},
     },
+    sessions: {
+      list: async () => [],
+      updateMeta: async () => {},
+      delete: async () => {},
+      load: async () => [],
+      resume: async () => ({ sessionId: `test-session-${++sessionCounter}` }),
+    },
     on: (event, handler) => {
       if (!handlers.has(event)) handlers.set(event, new Set())
       handlers.get(event)!.add(handler as (payload: unknown) => void)
@@ -122,6 +129,14 @@ if (process.env['PI_E2E']) {
     },
     shell: {
       openPath: (path) => ipcRenderer.invoke('shell:openPath', { path }),
+    },
+    sessions: {
+      list: () => ipcRenderer.invoke('sessions:list'),
+      updateMeta: (sessionId, patch) =>
+        ipcRenderer.invoke('sessions:updateMeta', { sessionId, patch }),
+      delete: (sessionId) => ipcRenderer.invoke('sessions:delete', { sessionId }),
+      load: (sessionPath) => ipcRenderer.invoke('session:load', { sessionPath }),
+      resume: (sessionPath) => ipcRenderer.invoke('session:resume', { sessionPath }),
     },
     on: <E extends PiEventName>(event: E, handler: (payload: PiEventPayloads[E]) => void) => {
       const listener = (_: import('electron').IpcRendererEvent, payload: PiEventPayloads[E]) =>

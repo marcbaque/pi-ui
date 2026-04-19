@@ -76,6 +76,26 @@ export interface PiEventPayloads {
   'pi:error': { sessionId: string; message: string }
 }
 
+export interface SessionSummary {
+  id: string
+  path: string // full path to JSONL file
+  cwd: string // full working directory path
+  cwdSlug: string // basename of the cwd session dir slug
+  lastActiveAt: number // modified date of JSONL file in ms
+  model: string | null // from SessionInfo
+  pinned: boolean // from .meta.json
+  tags: string[] // from .meta.json
+  name: string | null // from SDK SessionInfo.name; null = display timestamp
+  isActive: boolean // true if id matches the current live session
+}
+
+export interface SessionMeta {
+  [sessionId: string]: {
+    tags: string[]
+    pinned: boolean
+  }
+}
+
 export type PiEventName = keyof PiEventPayloads
 
 /** The window.pi API exposed by the preload script */
@@ -103,6 +123,16 @@ export interface PiAPI {
   }
   shell: {
     openPath(path: string): Promise<void>
+  }
+  sessions: {
+    list(): Promise<SessionSummary[]>
+    updateMeta(
+      sessionId: string,
+      patch: Partial<{ tags: string[]; pinned: boolean }>
+    ): Promise<void>
+    delete(sessionId: string): Promise<void>
+    load(sessionPath: string): Promise<Message[]>
+    resume(sessionPath: string): Promise<{ sessionId: string }>
   }
   on<E extends PiEventName>(event: E, handler: (payload: PiEventPayloads[E]) => void): () => void
 }
