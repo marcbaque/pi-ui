@@ -21,7 +21,8 @@
     "changelog": "changelogen --output CHANGELOG.md",
     "release": "changelogen --output CHANGELOG.md && git add CHANGELOG.md && git commit -m 'chore: update changelog' || true",
     "dist:dir": "electron-vite build && electron-builder --dir --universal",
-    "dist:win": "electron-vite build && electron-builder --win",
+    "dist": "electron-vite build && electron-builder --universal --publish never",
+    "dist:win": "electron-vite build && electron-builder --win --publish never",
     "e2e": "playwright test",
     "e2e:headed": "playwright test --headed",
     "e2e:ui": "playwright test --ui"
