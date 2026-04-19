@@ -4,14 +4,16 @@ import type { AuthService } from './auth-service'
 import type { ModelEntry } from '@shared/types'
 
 export class ModelService {
-  private readonly registry: InstanceType<typeof ModelRegistry>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private readonly registry: any
 
   constructor(authService: AuthService) {
     this.registry = ModelRegistry.create(authService.storage)
   }
 
   async listAvailable(): Promise<ModelEntry[]> {
-    return this.registry.getAvailable().map((m) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return this.registry.getAvailable().map((m: any) => ({
       provider: m.provider,
       modelId: m.id,
       displayName: m.name,
