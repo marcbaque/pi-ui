@@ -20,7 +20,7 @@ export default function NewSessionDialog() {
   const ui = useStore((s) => s.ui)
   const config = useStore((s) => s.config)
   const closeNewSession = useStore((s) => s.closeNewSession)
-  const setSessionActive = useStore((s) => s.setSessionActive)
+  const createTab = useStore((s) => s.createTab)
 
   const [cwd, setCwd] = useState(config.defaultWorkingDirectory ?? '~')
   const [model, setModel] = useState(config.defaultModel ?? '')
@@ -49,12 +49,17 @@ export default function NewSessionDialog() {
         provider: effectiveProvider,
         thinkingLevel: thinking,
       })
-      setSessionActive({
+      createTab({
+        id: sessionId,
         sessionId,
         cwd,
         model: effectiveModel,
         provider: effectiveProvider,
         thinkingLevel: thinking,
+        status: 'idle',
+        messages: [],
+        currentStreamingContent: '',
+        mode: 'active',
       })
       closeNewSession()
     } catch (err) {
