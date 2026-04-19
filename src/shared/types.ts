@@ -47,11 +47,26 @@ export interface Message {
   createdAt: number
 }
 
+export interface ToolResultDetails {
+  truncation?: {
+    truncated: boolean
+    truncatedBy?: 'lines' | 'bytes'
+    totalLines?: number
+    outputLines?: number
+    outputBytes?: number
+    maxBytes?: number
+    lastLinePartial?: boolean
+  }
+  fullOutputPath?: string
+  exitCode?: number | null
+}
+
 export interface ToolCall {
   id: string
   toolName: string
   args: Record<string, unknown>
   result: string | null
+  details: ToolResultDetails | null
   isError: boolean
   durationMs: number | null
   status: 'pending' | 'done'
@@ -71,6 +86,7 @@ export interface PiEventPayloads {
     toolCallId: string
     toolName: string
     result: string
+    details: ToolResultDetails | null
     isError: boolean
     durationMs: number
   }

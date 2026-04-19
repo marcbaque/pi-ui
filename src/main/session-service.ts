@@ -84,7 +84,7 @@ export class SessionService {
             .join('')
           if (rawResult.details) {
             details = {
-              truncation: rawResult.details.truncation as unknown as string,
+              truncation: rawResult.details.truncation as never,
               fullOutputPath: rawResult.details.fullOutputPath,
             }
           }

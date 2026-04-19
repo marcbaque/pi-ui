@@ -156,7 +156,16 @@ if (process.env['PI_E2E']) {
       result: string,
       isError: boolean,
       durationMs: number
-    ) => emit('pi:tool-end', { sessionId, toolCallId, toolName, result, isError, durationMs }),
+    ) =>
+      emit('pi:tool-end', {
+        sessionId,
+        toolCallId,
+        toolName,
+        result,
+        details: null,
+        isError,
+        durationMs,
+      }),
     emitTurnEnd: (sessionId: string) => emit('pi:turn-end', { sessionId }),
     emitIdle: (sessionId: string) => emit('pi:idle', { sessionId }),
     emitError: (sessionId: string, message: string) => emit('pi:error', { sessionId, message }),

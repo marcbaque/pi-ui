@@ -2,6 +2,7 @@
 import { cn } from '@/lib/utils'
 import { useStore } from '@/store'
 import { useActiveTab } from '@/hooks/useActiveTab'
+import { useAvailableModels } from '@/hooks/useAvailableModels'
 import {
   Select,
   SelectContent,
@@ -15,7 +16,7 @@ const LEVELS: AppThinkingLevel[] = ['off', 'low', 'high']
 
 export default function Toolbar() {
   const tab = useActiveTab()
-  const config = useStore((s) => s.config)
+  const availableModels = useAvailableModels()
   const replaceTab = useStore((s) => s.replaceTab)
 
   if (!tab) return null
@@ -58,7 +59,7 @@ export default function Toolbar() {
           position="popper"
           className="max-h-60 overflow-y-auto border-zinc-800 bg-zinc-900"
         >
-          {config.models.map((m) => (
+          {availableModels.map((m) => (
             <SelectItem
               key={`${m.provider}/${m.modelId}`}
               value={`${m.provider}/${m.modelId}`}

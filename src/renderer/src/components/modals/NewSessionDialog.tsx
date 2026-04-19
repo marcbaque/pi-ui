@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { useStore } from '@/store'
+import { useAvailableModels } from '@/hooks/useAvailableModels'
 import type { AppThinkingLevel } from '@shared/types'
 
 const THINKING_LEVELS: AppThinkingLevel[] = ['off', 'low', 'high']
@@ -19,6 +20,7 @@ const THINKING_LEVELS: AppThinkingLevel[] = ['off', 'low', 'high']
 export default function NewSessionDialog() {
   const ui = useStore((s) => s.ui)
   const config = useStore((s) => s.config)
+  const availableModels = useAvailableModels()
   const closeNewSession = useStore((s) => s.closeNewSession)
   const createTab = useStore((s) => s.createTab)
 
@@ -126,7 +128,7 @@ export default function NewSessionDialog() {
                 position="popper"
                 className="max-h-60 overflow-y-auto border-zinc-800 bg-zinc-900"
               >
-                {config.models.map((m) => (
+                {availableModels.map((m) => (
                   <SelectItem
                     key={`${m.provider}/${m.modelId}`}
                     value={`${m.provider}/${m.modelId}`}

@@ -40,7 +40,13 @@ export interface TabsActions {
   ): void
   resolveToolCall(
     tabId: string,
-    result: { toolCallId: string; result: string; isError: boolean; durationMs: number }
+    result: {
+      toolCallId: string
+      result: string
+      details?: import('@shared/types').ToolResultDetails | null
+      isError: boolean
+      durationMs: number
+    }
   ): void
   replaceTab(tabId: string, newTab: Tab): void
 }
@@ -137,6 +143,7 @@ export const createTabsSlice = (
         toolName,
         args,
         result: null,
+        details: null,
         isError: false,
         durationMs: null,
         status: 'pending',
@@ -144,7 +151,7 @@ export const createTabsSlice = (
       last.toolCalls.push(call)
     }),
 
-  resolveToolCall: (tabId, { toolCallId, result, isError, durationMs }) =>
+  resolveToolCall: (tabId, { toolCallId, result, details, isError, durationMs }) =>
     set((s) => {
       const tab = s.tabs.tabs.find((t) => t.id === tabId)
       if (!tab) return
@@ -152,6 +159,7 @@ export const createTabsSlice = (
         const call = msg.toolCalls.find((c) => c.id === toolCallId)
         if (call) {
           call.result = result
+          call.details = details ?? null
           call.isError = isError
           call.durationMs = durationMs
           call.status = 'done'

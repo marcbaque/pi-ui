@@ -33,11 +33,14 @@ export function usePiEvents(): void {
         addToolCall(tabId, { toolCallId, toolName, args })
       }),
 
-      window.pi.on('pi:tool-end', ({ sessionId, toolCallId, result, isError, durationMs }) => {
-        const tabId = findTabId(sessionId)
-        if (!tabId) return
-        resolveToolCall(tabId, { toolCallId, result, isError, durationMs })
-      }),
+      window.pi.on(
+        'pi:tool-end',
+        ({ sessionId, toolCallId, result, details, isError, durationMs }) => {
+          const tabId = findTabId(sessionId)
+          if (!tabId) return
+          resolveToolCall(tabId, { toolCallId, result, details, isError, durationMs })
+        }
+      ),
 
       window.pi.on('pi:turn-end', () => {
         // Turn ended — assistant message finalized on pi:idle
