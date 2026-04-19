@@ -1,6 +1,14 @@
 // src/preload/index.ts
 import { contextBridge, ipcRenderer } from 'electron'
-import type { PiAPI, PiEventName, PiEventPayloads, AppConfig, ModelEntry } from '@shared/types'
+import type {
+  PiAPI,
+  PiEventName,
+  PiEventPayloads,
+  AppConfig,
+  ModelEntry,
+  SessionSummary,
+  Message,
+} from '@shared/types'
 
 // ─── E2E mock bridge ────────────────────────────────────────────────────────
 if (process.env['PI_E2E']) {
@@ -43,6 +51,50 @@ if (process.env['PI_E2E']) {
     handlers.get(event)?.forEach((h) => h(payload as unknown))
   }
 
+  const MOCK_SESSIONS: SessionSummary[] = [
+    {
+      id: 'past-session-1',
+      path: '/mock/sessions/--mock-project--/2024-01-01T00-00-00-000Z_past-session-1.jsonl',
+      cwd: '/mock/project',
+      cwdSlug: '--mock-project--',
+      lastActiveAt: Date.now() - 3600_000,
+      model: 'claude-sonnet-4-5',
+      pinned: false,
+      tags: [],
+      name: null,
+      isActive: false,
+    },
+    {
+      id: 'past-session-2',
+      path: '/mock/sessions/--mock-project--/2024-01-02T00-00-00-000Z_past-session-2.jsonl',
+      cwd: '/mock/project',
+      cwdSlug: '--mock-project--',
+      lastActiveAt: Date.now() - 86400_000,
+      model: 'claude-opus-4-5',
+      pinned: true,
+      tags: ['important'],
+      name: 'My important session',
+      isActive: false,
+    },
+  ]
+
+  const MOCK_LOADED_MESSAGES: Message[] = [
+    {
+      id: 'msg-1',
+      role: 'user',
+      content: 'This is a past message',
+      toolCalls: [],
+      createdAt: Date.now() - 3600_000,
+    },
+    {
+      id: 'msg-2',
+      role: 'assistant',
+      content: 'This is a past assistant reply',
+      toolCalls: [],
+      createdAt: Date.now() - 3590_000,
+    },
+  ]
+
   const mockApi: PiAPI = {
     session: {
       create: async () => ({ sessionId: `test-session-${++sessionCounter}` }),
@@ -69,11 +121,11 @@ if (process.env['PI_E2E']) {
       openPath: async () => {},
     },
     sessions: {
-      list: async () => [],
+      list: async () => MOCK_SESSIONS,
       updateMeta: async () => {},
       delete: async () => {},
-      load: async () => [],
-      resume: async () => ({ sessionId: `test-session-${++sessionCounter}` }),
+      load: async (_sessionPath: string) => MOCK_LOADED_MESSAGES,
+      resume: async (_sessionPath: string) => ({ sessionId: `test-session-${++sessionCounter}` }),
     },
     on: (event, handler) => {
       if (!handlers.has(event)) handlers.set(event, new Set())
@@ -104,6 +156,7 @@ if (process.env['PI_E2E']) {
     emitIdle: (sessionId: string) => emit('pi:idle', { sessionId }),
     emitError: (sessionId: string, message: string) => emit('pi:error', { sessionId, message }),
     getLastSessionId: () => `test-session-${sessionCounter}`,
+    getSessions: () => MOCK_SESSIONS,
   }
 
   contextBridge.exposeInMainWorld('pi', mockApi)

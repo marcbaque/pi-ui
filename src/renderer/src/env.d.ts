@@ -22,6 +22,7 @@ interface MockPiControl {
   emitIdle(sessionId: string): void
   emitError(sessionId: string, message: string): void
   getLastSessionId(): string
+  getSessions(): import('../../shared/types').SessionSummary[]
 }
 
 declare global {

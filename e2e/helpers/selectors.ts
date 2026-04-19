@@ -50,3 +50,18 @@ export const settingsModal = {
   defaultModelSelect: (page: Page) => page.locator('[data-testid="default-model-select"]'),
   systemPromptInput: (page: Page) => page.locator('[data-testid="system-prompt-input"]'),
 }
+
+
+export const sessionHistory = {
+  list: (page: Page) => page.locator('[data-testid="session-list"]'),
+  search: (page: Page) => page.locator('[data-testid="session-search"]'),
+  cwdGroup: (page: Page, slug: string) => page.locator(`[data-testid="cwd-group-${slug}"]`),
+  sessionEntry: (page: Page, id: string) => page.locator(`[data-testid="session-entry-${id}"]`),
+  contextMenu: (page: Page) => page.locator('[data-testid="session-context-menu"]'),
+  contextMenuRename: (page: Page) => page.locator('[data-testid="context-menu-rename"]'),
+  contextMenuPin: (page: Page) => page.locator('[data-testid="context-menu-pin"]'),
+  contextMenuDelete: (page: Page) => page.locator('[data-testid="context-menu-delete"]'),
+  renameInput: (page: Page) => page.locator('[data-testid="rename-input"]'),
+  resumeBar: (page: Page) => page.locator('[data-testid="resume-bar"]'),
+  resumeBtn: (page: Page) => page.locator('[data-testid="resume-btn"]'),
+}
