@@ -1,4 +1,5 @@
 // src/renderer/src/components/chat/ToolCallEntry.tsx
+import { useState } from 'react'
 import type { ToolCall } from '@shared/types'
 
 interface Props {
@@ -8,10 +9,9 @@ interface Props {
 function getDisplayPath(call: ToolCall): string {
   const args = call.args
   if (typeof args.path === 'string') return args.path
-  if (typeof args.command === 'string') return args.command.slice(0, 80)
-  // Show first string arg value as fallback
+  if (typeof args.command === 'string') return args.command.slice(0, 120)
   const first = Object.values(args).find((v) => typeof v === 'string')
-  return typeof first === 'string' ? first.slice(0, 80) : ''
+  return typeof first === 'string' ? first.slice(0, 120) : ''
 }
 
 function getBg(call: ToolCall): string {
@@ -33,28 +33,54 @@ function getStatusColor(call: ToolCall): string {
 }
 
 export default function ToolCallEntry({ call }: Props) {
+  const [expanded, setExpanded] = useState(false)
   const displayPath = getDisplayPath(call)
+  const hasOutput = call.status === 'done' && call.result && call.result.trim().length > 0
 
   return (
     <div
       data-testid="tool-call-entry"
-      className="mx-3 my-0.5 flex items-center gap-2 rounded px-3 py-1.5 font-mono text-[11px]"
+      className="mx-3 my-px rounded"
       style={{ backgroundColor: getBg(call) }}
     >
-      <span data-testid="tool-call-toggle" style={{ color: 'var(--pi-dim)' }}>
-        ▸
-      </span>
-      <span className="font-medium" style={{ color: 'var(--pi-accent)' }}>
-        {call.toolName}
-      </span>
-      {displayPath && (
-        <span className="flex-1 truncate" style={{ color: 'var(--pi-dim)' }}>
-          {displayPath}
+      {/* Header row */}
+      <button
+        data-testid="tool-call-toggle"
+        onClick={() => hasOutput && setExpanded((e) => !e)}
+        className="flex w-full items-center gap-2 px-3 py-1 font-mono text-xs"
+        style={{ cursor: hasOutput ? 'pointer' : 'default' }}
+      >
+        <span style={{ color: 'var(--pi-dim)', fontSize: '10px' }}>
+          {hasOutput ? (expanded ? '▾' : '▸') : '▸'}
         </span>
+        <span className="font-medium" style={{ color: 'var(--pi-accent)' }}>
+          {call.toolName}
+        </span>
+        {displayPath && (
+          <span className="flex-1 truncate text-left" style={{ color: 'var(--pi-dim)' }}>
+            {displayPath}
+          </span>
+        )}
+        <span className="ml-auto shrink-0 tabular-nums" style={{ color: getStatusColor(call) }}>
+          {getStatusText(call)}
+        </span>
+      </button>
+
+      {/* Expandable output */}
+      {expanded && hasOutput && (
+        <div
+          className="mx-3 mb-2 overflow-x-auto whitespace-pre-wrap font-mono text-xs leading-relaxed"
+          style={{
+            color: 'var(--pi-dim)',
+            borderTop: '1px solid rgba(255,255,255,0.06)',
+            paddingTop: '6px',
+            maxHeight: '320px',
+            overflowY: 'auto',
+          }}
+        >
+          {call.result}
+        </div>
       )}
-      <span className="ml-auto shrink-0 tabular-nums" style={{ color: getStatusColor(call) }}>
-        {getStatusText(call)}
-      </span>
     </div>
   )
 }

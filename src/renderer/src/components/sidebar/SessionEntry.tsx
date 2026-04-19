@@ -58,7 +58,7 @@ export default function SessionEntry({
       <div
         data-testid={`session-entry-${session.id}`}
         className={cn(
-          'group flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 text-xs transition-colors',
+          'group flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 transition-colors',
           isSelected
             ? 'bg-zinc-800 text-zinc-200'
             : 'text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300'
@@ -103,7 +103,7 @@ export default function SessionEntry({
                 closeContextMenu()
                 setRenaming(true)
               }}
-              className="block w-full px-3 py-1.5 text-left text-xs text-zinc-300 hover:bg-zinc-800"
+              className="block w-full px-3 py-1.5 text-left text-zinc-300 hover:bg-zinc-800"
             >
               Rename
             </button>
@@ -113,7 +113,7 @@ export default function SessionEntry({
                 closeContextMenu()
                 onTogglePin()
               }}
-              className="block w-full px-3 py-1.5 text-left text-xs text-zinc-300 hover:bg-zinc-800"
+              className="block w-full px-3 py-1.5 text-left text-zinc-300 hover:bg-zinc-800"
             >
               {session.pinned ? 'Unpin' : 'Pin'}
             </button>
@@ -124,7 +124,7 @@ export default function SessionEntry({
                 closeContextMenu()
                 onDelete()
               }}
-              className="block w-full px-3 py-1.5 text-left text-xs text-red-400 hover:bg-zinc-800"
+              className="block w-full px-3 py-1.5 text-left text-red-400 hover:bg-zinc-800"
             >
               Delete
             </button>

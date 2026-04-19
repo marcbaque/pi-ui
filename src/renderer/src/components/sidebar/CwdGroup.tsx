@@ -45,7 +45,7 @@ export default function CwdGroup({
       <button
         onClick={onToggle}
         title={cwd}
-        className="flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-left text-[10px] uppercase tracking-widest text-zinc-600 transition-colors hover:bg-zinc-900 hover:text-zinc-400"
+        className="flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-left uppercase tracking-widest text-zinc-600 transition-colors hover:bg-zinc-900 hover:text-zinc-400"
       >
         {expanded ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
         <span className="truncate">{cwdBasename(cwd)}</span>

@@ -28,7 +28,7 @@ export default function SessionSearch({ value, onChange }: Props) {
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Search sessions…"
-        className="w-full rounded bg-zinc-900 py-1 pl-6 pr-6 text-xs text-zinc-300 placeholder-zinc-600 outline-none focus:ring-1 focus:ring-zinc-700"
+        className="w-full rounded bg-zinc-900 py-1 pl-6 pr-6 text-zinc-300 placeholder-zinc-600 outline-none focus:ring-1 focus:ring-zinc-700"
       />
       {value && (
         <button

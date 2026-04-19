@@ -30,11 +30,11 @@ export default function Sidebar() {
           data-testid="settings-btn"
           aria-label="Settings"
           onClick={openSettings}
-          className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-zinc-500 transition-colors hover:bg-zinc-900 hover:text-zinc-300"
+          className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-zinc-500 transition-colors hover:bg-zinc-900 hover:text-zinc-300"
         >
           <Settings size={13} />
           Settings
-          <span className="ml-auto text-[10px] text-zinc-700">⌘,</span>
+          <span className="ml-auto text-zinc-700">⌘,</span>
         </button>
       </div>
     </aside>

@@ -42,7 +42,7 @@ export default function Toolbar() {
       className="flex items-center gap-3 border-b border-[var(--pi-border-subtle)] bg-[var(--pi-sidebar-bg)] px-3 py-2"
     >
       <Select value={`${session.provider}/${session.model}`} onValueChange={handleModelChange}>
-        <SelectTrigger className="h-7 w-48 border-zinc-800 bg-zinc-900 text-xs text-zinc-400">
+        <SelectTrigger className="h-7 w-48 border-zinc-800 bg-zinc-900 text-zinc-400">
           <SelectValue />
         </SelectTrigger>
         <SelectContent
@@ -66,7 +66,7 @@ export default function Toolbar() {
           <button
             key={level}
             className={cn(
-              'px-2 py-0.5 text-[10px] capitalize transition-colors',
+              'px-2 py-0.5 capitalize transition-colors',
               session.thinkingLevel === level
                 ? 'bg-[var(--pi-tool-success-bg)] text-[var(--pi-accent)]'
                 : 'text-zinc-600 hover:text-zinc-400'
@@ -79,7 +79,7 @@ export default function Toolbar() {
 
       <button
         onClick={() => session.cwd && window.pi.shell.openPath(session.cwd)}
-        className="ml-auto max-w-[200px] truncate text-[11px] text-zinc-600 transition-colors hover:text-zinc-400"
+        className="ml-auto max-w-[200px] truncate text-zinc-600 transition-colors hover:text-zinc-400"
       >
         {session.cwd}
       </button>

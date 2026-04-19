@@ -25,7 +25,7 @@ function UserMessage({ msg }: { msg: Message }) {
   return (
     <div
       data-testid="user-message"
-      className="mx-3 my-2 rounded-md px-4 py-3"
+      className="mx-3 my-1 rounded px-3 py-2"
       style={{ backgroundColor: 'var(--pi-user-msg-bg)' }}
     >
       <PiMarkdown>{msg.content}</PiMarkdown>
@@ -35,17 +35,11 @@ function UserMessage({ msg }: { msg: Message }) {
 
 function AssistantMessage({ content, streaming }: { content: string; streaming?: boolean }) {
   return (
-    <div data-testid="assistant-message" className="px-5 py-2">
-      <p
-        className="mb-2 text-[10px] font-semibold uppercase tracking-widest"
-        style={{ color: 'var(--pi-accent)' }}
-      >
-        pi
-      </p>
+    <div data-testid="assistant-message" className="px-4 py-1.5">
       <PiMarkdown>{content}</PiMarkdown>
       {streaming && (
         <span
-          className="ml-0.5 inline-block h-3.5 w-0.5 animate-pulse align-middle"
+          className="ml-0.5 inline-block h-3 w-0.5 animate-pulse align-middle"
           style={{ backgroundColor: 'var(--pi-accent)' }}
         />
       )}
@@ -60,17 +54,21 @@ export default function MessageList({ readonlyMessages }: Props = {}) {
   const scrollRef = useAutoScroll<HTMLDivElement>(messages.length + streamingContent.length)
 
   return (
-    <div ref={scrollRef} data-testid="message-list" className="flex-1 overflow-y-auto py-2">
+    <div ref={scrollRef} data-testid="message-list" className="flex-1 overflow-y-auto py-1">
       {messages.map((msg) => (
-        <div key={msg.id}>
+        <div key={msg.id} className="mb-1">
           {msg.role === 'user' ? (
             <UserMessage msg={msg} />
           ) : (
             <AssistantMessage content={msg.content} />
           )}
-          {msg.toolCalls.map((call) => (
-            <ToolCallEntry key={call.id} call={call} />
-          ))}
+          {msg.toolCalls.length > 0 && (
+            <div className="mt-0.5 space-y-px">
+              {msg.toolCalls.map((call) => (
+                <ToolCallEntry key={call.id} call={call} />
+              ))}
+            </div>
+          )}
         </div>
       ))}
 

@@ -34,7 +34,7 @@ export default function RenameInput({ initialValue, onConfirm, onCancel }: Props
       onChange={(e) => setValue(e.target.value)}
       onKeyDown={handleKeyDown}
       onBlur={() => onConfirm(value.trim() || initialValue)}
-      className="w-full rounded border border-zinc-700 bg-zinc-800 px-1.5 py-0.5 text-xs text-zinc-200 outline-none"
+      className="w-full rounded border border-zinc-700 bg-zinc-800 px-1.5 py-0.5 text-zinc-200 outline-none"
     />
   )
 }

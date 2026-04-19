@@ -56,7 +56,7 @@ export default function InputArea() {
                 ? 'Something went wrong — try again'
                 : 'Send a message… (Enter to send, Shift+Enter for newline)'
           }
-          className="w-full resize-none bg-transparent px-3 py-2.5 text-sm text-zinc-300 placeholder-zinc-600 outline-none disabled:cursor-not-allowed"
+          className="w-full resize-none bg-transparent px-3 py-2.5 text-zinc-300 placeholder-zinc-600 outline-none disabled:cursor-not-allowed"
           style={{ minHeight: 40, maxHeight: 160 }}
         />
         {!thinking && (
@@ -67,7 +67,7 @@ export default function InputArea() {
               size="sm"
               onClick={send}
               disabled={!value.trim()}
-              className="h-7 border border-zinc-700 bg-zinc-800 px-2 text-xs text-zinc-400 hover:text-zinc-200"
+              className="h-7 border border-zinc-700 bg-zinc-800 px-2 text-zinc-400 hover:text-zinc-200"
             >
               ↵
             </Button>
@@ -80,7 +80,7 @@ export default function InputArea() {
               aria-label="Stop"
               size="sm"
               onClick={handleAbort}
-              className="h-7 border border-zinc-700 bg-zinc-800 px-2 text-xs text-zinc-400 hover:text-zinc-200"
+              className="h-7 border border-zinc-700 bg-zinc-800 px-2 text-zinc-400 hover:text-zinc-200"
             >
               ■ Stop
             </Button>
@@ -88,7 +88,7 @@ export default function InputArea() {
         )}
       </div>
       <div
-        className="mt-1.5 flex items-center gap-2 px-1 font-mono text-[10px]"
+        className="mt-1.5 flex items-center gap-2 px-1 font-mono"
         style={{ color: 'var(--pi-dim)' }}
       >
         {/* Status */}
