@@ -1,0 +1,118 @@
+<h2>Revised Architecture — Electron + Pi SDK</h2>
+<p class="subtitle">The Rust translation layer is gone — SDK handles everything natively</p>
+
+<div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+
+  <!-- Renderer Process -->
+  <div style="border: 1px solid #1a3a1a; border-radius: 10px; background: #0d1a0d; padding: 16px;">
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+      <span style="background: #1a3a1a; color: #4caf50; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-family: monospace;">Renderer Process — React + TypeScript (Vite)</span>
+      <span style="color: #4a7a4a; font-size: 11px;">sandboxed, no Node.js access</span>
+    </div>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <div style="background: #111f11; border: 1px solid #1e3a1e; border-radius: 6px; padding: 8px 12px; flex: 1; min-width: 110px;">
+        <div style="color: #4caf50; font-size: 11px; font-family: monospace; margin-bottom: 4px;">Sidebar</div>
+        <div style="color: #4a6a4a; font-size: 10px;">Provider status</div>
+        <div style="color: #4a6a4a; font-size: 10px;">Model picker</div>
+        <div style="color: #4a6a4a; font-size: 10px;">New session</div>
+      </div>
+      <div style="background: #111f11; border: 1px solid #1e3a1e; border-radius: 6px; padding: 8px 12px; flex: 1; min-width: 110px;">
+        <div style="color: #4caf50; font-size: 11px; font-family: monospace; margin-bottom: 4px;">ChatPane</div>
+        <div style="color: #4a6a4a; font-size: 10px;">Message list</div>
+        <div style="color: #4a6a4a; font-size: 10px;">Streaming tokens</div>
+        <div style="color: #4a6a4a; font-size: 10px;">Tool call log</div>
+        <div style="color: #4a6a4a; font-size: 10px;">Input area</div>
+      </div>
+      <div style="background: #111f11; border: 1px solid #1e3a1e; border-radius: 6px; padding: 8px 12px; flex: 1; min-width: 110px;">
+        <div style="color: #4caf50; font-size: 11px; font-family: monospace; margin-bottom: 4px;">SettingsModal</div>
+        <div style="color: #4a6a4a; font-size: 10px;">API key inputs</div>
+        <div style="color: #4a6a4a; font-size: 10px;">Default model</div>
+        <div style="color: #4a6a4a; font-size: 10px;">System prompt</div>
+      </div>
+      <div style="background: #111f11; border: 1px solid #1e3a1e; border-radius: 6px; padding: 8px 12px; flex: 1; min-width: 110px;">
+        <div style="color: #4caf50; font-size: 11px; font-family: monospace; margin-bottom: 4px;">Zustand store</div>
+        <div style="color: #4a6a4a; font-size: 10px;">session status</div>
+        <div style="color: #4a6a4a; font-size: 10px;">messages[ ]</div>
+        <div style="color: #4a6a4a; font-size: 10px;">providers config</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preload bridge -->
+  <div style="text-align: center; color: #666; font-size: 11px; font-family: monospace; padding: 2px 0; display: flex; align-items: center; justify-content: center; gap: 12px;">
+    <div style="flex: 1; height: 1px; background: #2a2a2a;"></div>
+    <span style="background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 3px 12px; color: #888;">Preload script — <code>contextBridge</code> exposes typed <code>window.pi</code> API</span>
+    <div style="flex: 1; height: 1px; background: #2a2a2a;"></div>
+  </div>
+
+  <!-- Main Process -->
+  <div style="border: 1px solid #1a2a3a; border-radius: 10px; background: #0d1520; padding: 16px;">
+    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+      <span style="background: #1a2a3a; color: #5b9bd5; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-family: monospace;">Main Process — Node.js (Electron)</span>
+      <span style="color: #3a5a7a; font-size: 11px;">full Node.js access, owns SDK instances</span>
+    </div>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <div style="background: #0d1a27; border: 1px solid #1a2d3f; border-radius: 6px; padding: 8px 12px; flex: 1; min-width: 110px;">
+        <div style="color: #5b9bd5; font-size: 11px; font-family: monospace; margin-bottom: 4px;">SessionManager</div>
+        <div style="color: #3a5a7a; font-size: 10px;">createAgentSession()</div>
+        <div style="color: #3a5a7a; font-size: 10px;">session.prompt()</div>
+        <div style="color: #3a5a7a; font-size: 10px;">session.abort()</div>
+        <div style="color: #3a5a7a; font-size: 10px;">session.subscribe()</div>
+      </div>
+      <div style="background: #0d1a27; border: 1px solid #1a2d3f; border-radius: 6px; padding: 8px 12px; flex: 1; min-width: 110px;">
+        <div style="color: #5b9bd5; font-size: 11px; font-family: monospace; margin-bottom: 4px;">AuthStorage</div>
+        <div style="color: #3a5a7a; font-size: 10px;">AuthStorage.create()</div>
+        <div style="color: #3a5a7a; font-size: 10px;">setRuntimeApiKey()</div>
+        <div style="color: #3a5a7a; font-size: 10px;">reads auth.json</div>
+        <div style="color: #3a5a7a; font-size: 10px;">writes auth.json</div>
+      </div>
+      <div style="background: #0d1a27; border: 1px solid #1a2d3f; border-radius: 6px; padding: 8px 12px; flex: 1; min-width: 110px;">
+        <div style="color: #5b9bd5; font-size: 11px; font-family: monospace; margin-bottom: 4px;">ModelRegistry</div>
+        <div style="color: #3a5a7a; font-size: 10px;">ModelRegistry.create()</div>
+        <div style="color: #3a5a7a; font-size: 10px;">getAvailable()</div>
+        <div style="color: #3a5a7a; font-size: 10px;">returns typed Model[]</div>
+      </div>
+      <div style="background: #0d1a27; border: 1px solid #1a2d3f; border-radius: 6px; padding: 8px 12px; flex: 1; min-width: 110px;">
+        <div style="color: #5b9bd5; font-size: 11px; font-family: monospace; margin-bottom: 4px;">SettingsManager</div>
+        <div style="color: #3a5a7a; font-size: 10px;">SettingsManager.create()</div>
+        <div style="color: #3a5a7a; font-size: 10px;">read/write settings</div>
+        <div style="color: #3a5a7a; font-size: 10px;">defaultModel</div>
+        <div style="color: #3a5a7a; font-size: 10px;">thinkingLevel</div>
+      </div>
+      <div style="background: #0d1a27; border: 1px solid #1a2d3f; border-radius: 6px; padding: 8px 12px; flex: 1; min-width: 110px;">
+        <div style="color: #5b9bd5; font-size: 11px; font-family: monospace; margin-bottom: 4px;">IpcBridge</div>
+        <div style="color: #3a5a7a; font-size: 10px;">ipcMain handlers</div>
+        <div style="color: #3a5a7a; font-size: 10px;">forward SDK events</div>
+        <div style="color: #3a5a7a; font-size: 10px;">→ renderer via</div>
+        <div style="color: #3a5a7a; font-size: 10px;">webContents.send()</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- IPC surface -->
+<div style="display: flex; gap: 16px;">
+  <div style="flex: 1; padding: 14px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border);">
+    <p class="label" style="margin-bottom: 8px;">invoke (renderer → main)</p>
+    <code style="font-size: 11px; color: #5b9bd5; display: block;">session:create { cwd, model, thinkingLevel }</code>
+    <code style="font-size: 11px; color: #5b9bd5; display: block;">session:send { message }</code>
+    <code style="font-size: 11px; color: #5b9bd5; display: block;">session:abort</code>
+    <code style="font-size: 11px; color: #5b9bd5; display: block;">config:get</code>
+    <code style="font-size: 11px; color: #5b9bd5; display: block;">config:setApiKey { provider, key }</code>
+    <code style="font-size: 11px; color: #5b9bd5; display: block;">models:list</code>
+  </div>
+  <div style="flex: 1; padding: 14px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border);">
+    <p class="label" style="margin-bottom: 8px;">on (main → renderer)</p>
+    <code style="font-size: 11px; color: #4caf50; display: block;">pi:token { delta }</code>
+    <code style="font-size: 11px; color: #4caf50; display: block;">pi:tool-start { toolName, args }</code>
+    <code style="font-size: 11px; color: #4caf50; display: block;">pi:tool-end { toolName, result, isError }</code>
+    <code style="font-size: 11px; color: #4caf50; display: block;">pi:turn-end</code>
+    <code style="font-size: 11px; color: #4caf50; display: block;">pi:idle</code>
+    <code style="font-size: 11px; color: #4caf50; display: block;">pi:error { message }</code>
+  </div>
+</div>
+
+<div style="margin-top: 12px; padding: 12px 16px; background: #0d1a0d; border: 1px solid #1a3a1a; border-radius: 8px;">
+  <p style="font-size: 11px; color: #4a7a4a;"><strong style="color: #4caf50;">vs Tauri:</strong> No subprocess spawning, no JSONL parsing, no Rust. SDK events map directly to IPC events. AuthStorage/ModelRegistry/SettingsManager replace the entire ConfigManager + ModelRegistry we'd have written in Rust.</p>
+</div>

@@ -1,0 +1,112 @@
+<h2>Phase 1 Layout Approaches</h2>
+<p class="subtitle">Auth + single session chat — which structure feels right?</p>
+
+<div class="cards" style="grid-template-columns: repeat(3, 1fr); gap: 20px;">
+
+  <!-- Option A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #0d0d0d; border-radius: 8px 8px 0 0; font-family: monospace; font-size: 11px;">
+      <div style="color: #555; margin-bottom: 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Onboarding → Chat</div>
+      <!-- Auth screen -->
+      <div style="border: 1px solid #333; border-radius: 6px; padding: 10px; margin-bottom: 8px; background: #111;">
+        <div style="color: #888; font-size: 10px; margin-bottom: 6px;">① First launch — setup</div>
+        <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px; padding: 6px; margin-bottom: 4px;">
+          <div style="color: #ccc; font-size: 10px;">Anthropic API key</div>
+          <div style="color: #444; font-size: 10px; margin-top: 2px;">sk-ant-••••••••••••</div>
+        </div>
+        <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px; padding: 6px; margin-bottom: 6px;">
+          <div style="color: #ccc; font-size: 10px;">Default model</div>
+          <div style="color: #444; font-size: 10px; margin-top: 2px;">claude-sonnet-4 ▾</div>
+        </div>
+        <div style="background: #0071e3; border-radius: 4px; padding: 4px 8px; color: white; font-size: 10px; text-align: center;">Continue →</div>
+      </div>
+      <!-- Chat screen -->
+      <div style="border: 1px solid #333; border-radius: 6px; padding: 10px; background: #111;">
+        <div style="color: #888; font-size: 10px; margin-bottom: 6px;">② Full-screen chat</div>
+        <div style="color: #555; font-size: 10px; margin-bottom: 4px;">pi  what can I help with?</div>
+        <div style="background: #1a2a1a; border-radius: 3px; padding: 4px 6px; color: #4a9; font-size: 10px; margin-bottom: 4px;">fix the auth bug</div>
+        <div style="color: #555; font-size: 10px; margin-bottom: 6px;">▸ read src/auth.ts · 12ms</div>
+        <div style="background: #1a1a2a; border: 1px solid #2a2a3a; border-radius: 3px; padding: 4px 6px; color: #88f; font-size: 10px;">I'll fix the null check on line 42...</div>
+        <div style="margin-top: 6px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 3px; padding: 4px 6px; color: #555; font-size: 10px;">Send a message...</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Onboarding Flow</h3>
+      <p>First-launch wizard collects auth, then transitions to a full-screen chat. Settings accessible via ⚙ icon. Clean and focused — one thing at a time.</p>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #0d0d0d; border-radius: 8px 8px 0 0; font-family: monospace; font-size: 11px;">
+      <div style="color: #555; margin-bottom: 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Persistent sidebar</div>
+      <div style="border: 1px solid #333; border-radius: 6px; overflow: hidden; display: flex; height: 140px;">
+        <!-- Sidebar -->
+        <div style="width: 90px; background: #0a0a0a; border-right: 1px solid #222; padding: 8px 6px; flex-shrink: 0;">
+          <div style="color: #888; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Models</div>
+          <div style="background: #1a2a1a; border-radius: 3px; padding: 3px 5px; color: #4a9; font-size: 9px; margin-bottom: 2px;">● claude-s.</div>
+          <div style="padding: 3px 5px; color: #555; font-size: 9px; margin-bottom: 2px;">  gpt-5</div>
+          <div style="padding: 3px 5px; color: #555; font-size: 9px; margin-bottom: 8px;">  gemini-2</div>
+          <div style="color: #888; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Auth</div>
+          <div style="padding: 3px 5px; color: #555; font-size: 9px;">⚙ Keys</div>
+        </div>
+        <!-- Chat -->
+        <div style="flex: 1; background: #111; padding: 8px; overflow: hidden;">
+          <div style="color: #888; font-size: 9px; margin-bottom: 4px;">New session</div>
+          <div style="color: #555; font-size: 9px; margin-bottom: 3px;">pi  Hello! What are we working on?</div>
+          <div style="background: #1a2a1a; border-radius: 3px; padding: 3px 5px; color: #4a9; font-size: 9px; margin-bottom: 3px;">fix the auth bug</div>
+          <div style="color: #555; font-size: 9px; margin-bottom: 3px;">▸ read src/auth.ts</div>
+          <div style="background: #1a1a2a; border-radius: 3px; padding: 3px 5px; color: #88f; font-size: 9px;">I'll fix this...</div>
+          <div style="position: absolute; bottom: 0; left: 90px; right: 0; background: #0d0d0d; border-top: 1px solid #222; padding: 4px 8px;">
+            <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 3px; padding: 3px; color: #444; font-size: 9px;">Message...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Persistent Sidebar</h3>
+      <p>Sidebar always visible with model/provider picker and auth link. Chat occupies the main area. Scales into Phase 2 (session history in sidebar) with no layout changes.</p>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 16px; background: #0d0d0d; border-radius: 8px 8px 0 0; font-family: monospace; font-size: 11px;">
+      <div style="color: #555; margin-bottom: 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">Toolbar + modal</div>
+      <div style="border: 1px solid #333; border-radius: 6px; overflow: hidden; background: #111;">
+        <!-- Toolbar -->
+        <div style="background: #0a0a0a; border-bottom: 1px solid #222; padding: 6px 10px; display: flex; align-items: center; gap: 8px;">
+          <div style="color: #ccc; font-size: 10px;">claude-sonnet-4 ▾</div>
+          <div style="color: #555; font-size: 10px;">·</div>
+          <div style="color: #555; font-size: 10px;">Low</div>
+          <div style="margin-left: auto; color: #555; font-size: 10px;">⚙</div>
+        </div>
+        <!-- Chat -->
+        <div style="padding: 8px; min-height: 100px; position: relative;">
+          <div style="color: #555; font-size: 10px; margin-bottom: 4px;">pi  What are we building?</div>
+          <div style="background: #1a2a1a; border-radius: 3px; padding: 4px 6px; color: #4a9; font-size: 10px; margin-bottom: 4px;">fix the auth bug</div>
+          <div style="color: #555; font-size: 10px; margin-bottom: 4px;">▸ read src/auth.ts · 12ms</div>
+          <div style="background: #1a1a2a; border-radius: 3px; padding: 4px 6px; color: #88f; font-size: 10px;">I'll update line 42...</div>
+        </div>
+        <!-- Settings modal overlay hint -->
+        <div style="margin: 0 8px 8px; border: 1px dashed #333; border-radius: 4px; padding: 6px; background: #0d1520; opacity: 0.9;">
+          <div style="color: #888; font-size: 9px; margin-bottom: 4px;">⚙ Settings modal (Cmd+,)</div>
+          <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 3px; padding: 4px 6px; margin-bottom: 3px;">
+            <div style="color: #ccc; font-size: 9px;">Anthropic  sk-ant-••••  [Save]</div>
+          </div>
+          <div style="color: #555; font-size: 9px;">OpenAI  [not configured]</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Toolbar + Modal Settings</h3>
+      <p>Full-screen chat from the start, thin toolbar for model/thinking, settings in a ⌘, modal. No sidebar until Phase 2. Maximum chat real estate now.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="section" style="margin-top: 24px; padding: 16px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border);">
+  <p class="label" style="margin-bottom: 8px;">My recommendation</p>
+  <p>Option <strong>B</strong> — the persistent sidebar means Phase 2 (session history) slots in with zero layout changes. The sidebar that shows models and auth in Phase 1 becomes the session list in Phase 2. No structural refactor needed between phases.</p>
+</div>

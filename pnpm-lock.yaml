@@ -29,9 +29,6 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      electron:
-        specifier: ^41.2.1
-        version: 41.2.1
       immer:
         specifier: ^11.1.4
         version: 11.1.4
@@ -99,6 +96,9 @@ importers:
       autoprefixer:
         specifier: ^10.5.0
         version: 10.5.0(postcss@8.5.10)
+      electron:
+        specifier: ^41.2.1
+        version: 41.2.1
       electron-builder:
         specifier: ^26.8.1
         version: 26.8.1(electron-builder-squirrel-windows@26.8.1)
