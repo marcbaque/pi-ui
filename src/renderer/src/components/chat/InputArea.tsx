@@ -67,9 +67,9 @@ export default function InputArea() {
   if (!tab || tab.mode !== 'active') return null
 
   const thinking = tab.status === 'thinking'
-  const hasErrors = attachedFiles.some((f) => f.error)
-  const hasContent = value.trim().length > 0 || attachedFiles.filter((f) => !f.error).length > 0
-  const canSend = !thinking && hasContent && !hasErrors
+  const validFiles = attachedFiles.filter((f) => !f.error)
+  const hasContent = value.trim().length > 0 || validFiles.length > 0
+  const canSend = !thinking && hasContent
 
   function addFile(name: string, path: string, content: string) {
     if (isBinary(content)) {
@@ -97,7 +97,7 @@ export default function InputArea() {
 
   async function send() {
     if (!tab || !canSend) return
-    const msg = buildMessage(value.trim(), attachedFiles)
+    const msg = buildMessage(value.trim(), validFiles)
     setValue('')
     setAttachedFiles([])
     addUserMessage(tab.id, msg)
@@ -149,7 +149,11 @@ export default function InputArea() {
   async function handlePaperclip() {
     try {
       const result = await window.pi.dialog.pickFile()
-      if (!result) return
+      if (!result) {
+        // Canceled — restore focus to textarea
+        setTimeout(() => textareaRef.current?.focus(), 50)
+        return
+      }
       addFile(result.name, result.path, result.content)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Could not read file'
@@ -158,7 +162,9 @@ export default function InputArea() {
         { id: crypto.randomUUID(), name: 'file', path: '', content: '', error: msg },
       ])
     }
-    textareaRef.current?.focus()
+    // Defer focus to give the Electron window time to regain OS focus
+    // after the native dialog sheet dismisses
+    setTimeout(() => textareaRef.current?.focus(), 50)
   }
 
   return (
