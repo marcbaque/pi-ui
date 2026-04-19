@@ -39,6 +39,7 @@ export default function InputArea() {
       <div className="relative rounded-lg border border-zinc-800 bg-zinc-900 focus-within:border-zinc-700">
         <textarea
           ref={textareaRef}
+          data-testid="chat-input"
           value={thinking ? '' : value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -50,9 +51,24 @@ export default function InputArea() {
           className="w-full resize-none bg-transparent px-3 py-2.5 text-sm text-zinc-300 placeholder-zinc-600 outline-none disabled:cursor-not-allowed"
           style={{ minHeight: 40, maxHeight: 160 }}
         />
+        {!thinking && (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+            <Button
+              data-testid="send-btn"
+              aria-label="Send"
+              size="sm"
+              onClick={send}
+              disabled={!value.trim()}
+              className="h-7 border border-zinc-700 bg-zinc-800 px-2 text-xs text-zinc-400 hover:text-zinc-200"
+            >
+              ↵
+            </Button>
+          </div>
+        )}
         {thinking && (
           <div className="absolute right-2 top-1/2 -translate-y-1/2">
             <Button
+              data-testid="stop-btn"
               aria-label="Stop"
               size="sm"
               onClick={handleAbort}
@@ -68,9 +84,10 @@ export default function InputArea() {
           className={`flex items-center gap-1.5 text-[11px] ${session.status === 'thinking' ? 'text-amber-600' : session.status === 'error' ? 'text-red-600' : 'text-zinc-700'}`}
         >
           <span
+            data-testid="status-dot"
             className={`h-1.5 w-1.5 rounded-full ${session.status === 'thinking' ? 'animate-pulse bg-amber-500' : session.status === 'error' ? 'bg-red-500' : 'bg-emerald-700'}`}
           />
-          {session.status}
+          <span data-testid="status-text">{session.status}</span>
         </span>
         <span className="ml-auto text-[11px] text-zinc-700">
           {session.model} · {session.cwd}

@@ -37,7 +37,10 @@ export default function Toolbar() {
   }
 
   return (
-    <div className="flex items-center gap-3 border-b border-zinc-900 bg-[#0a0a0a] px-3 py-2">
+    <div
+      data-testid="chat-toolbar"
+      className="flex items-center gap-3 border-b border-zinc-900 bg-[#0a0a0a] px-3 py-2"
+    >
       <Select value={`${session.provider}/${session.model}`} onValueChange={handleModelChange}>
         <SelectTrigger className="h-7 w-48 border-zinc-800 bg-zinc-900 text-xs text-zinc-400">
           <SelectValue />

@@ -4,6 +4,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { useStore } from '@/store'
 import type { AppThinkingLevel } from '@shared/types'
@@ -20,6 +27,11 @@ export default function SettingsModal() {
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({})
   const [systemPrompt, setSystemPrompt] = useState(config.systemPrompt)
   const [thinking, setThinking] = useState<AppThinkingLevel>(config.defaultThinkingLevel)
+  const [defaultModel, setDefaultModel] = useState(
+    config.defaultModel && config.defaultProvider
+      ? `${config.defaultProvider}/${config.defaultModel}`
+      : ''
+  )
 
   async function handleSaveApiKey(provider: string) {
     const key = apiKeys[provider]
@@ -36,8 +48,21 @@ export default function SettingsModal() {
   }
 
   async function handleSaveDefaults() {
-    await window.pi.config.setDefaults({ defaultThinkingLevel: thinking, systemPrompt })
-    setConfig({ ...config, defaultThinkingLevel: thinking, systemPrompt })
+    const [p, ...rest] = defaultModel.split('/')
+    const m = rest.join('/')
+    await window.pi.config.setDefaults({
+      defaultThinkingLevel: thinking,
+      systemPrompt,
+      defaultModel: m || null,
+      defaultProvider: p || null,
+    })
+    setConfig({
+      ...config,
+      defaultThinkingLevel: thinking,
+      systemPrompt,
+      defaultModel: m || null,
+      defaultProvider: p || null,
+    })
   }
 
   const apiKeyProviders = config.providers.filter((p) => p.authType === 'apikey')
@@ -45,7 +70,10 @@ export default function SettingsModal() {
 
   return (
     <Dialog open={ui.settingsOpen} onOpenChange={(open) => !open && closeSettings()}>
-      <DialogContent className="max-h-[80vh] overflow-y-auto border-zinc-800 bg-[#161616] text-zinc-200 sm:max-w-lg">
+      <DialogContent
+        data-testid="settings-modal"
+        className="max-h-[80vh] overflow-y-auto border-zinc-800 bg-[#161616] text-zinc-200 sm:max-w-lg"
+      >
         <DialogHeader>
           <DialogTitle className="text-sm font-semibold">Settings</DialogTitle>
         </DialogHeader>
@@ -88,6 +116,7 @@ export default function SettingsModal() {
             <div key={p.name} className="mb-3 flex items-center gap-2">
               <span className="w-24 shrink-0 text-xs text-zinc-400">{p.name}</span>
               <Input
+                data-testid={`api-key-input-${p.name.toLowerCase()}`}
                 type="password"
                 placeholder={
                   p.name === 'anthropic' ? 'sk-ant-…' : p.name === 'openai' ? 'sk-…' : 'API key'
@@ -100,6 +129,7 @@ export default function SettingsModal() {
                 )}
               />
               <Button
+                data-testid={`save-api-key-btn-${p.name.toLowerCase()}`}
                 aria-label={`Save ${p.name}`}
                 size="sm"
                 onClick={() => handleSaveApiKey(p.name)}
@@ -117,6 +147,30 @@ export default function SettingsModal() {
 
         <div className="border-t border-zinc-900 pt-4">
           <p className="mb-3 text-[10px] uppercase tracking-widest text-zinc-500">Defaults</p>
+          <div className="mb-3">
+            <label className="mb-1.5 block text-[10px] uppercase tracking-widest text-zinc-600">
+              Default Model
+            </label>
+            <Select value={defaultModel} onValueChange={setDefaultModel}>
+              <SelectTrigger
+                data-testid="default-model-select"
+                className="border-zinc-800 bg-zinc-900 text-xs text-zinc-300"
+              >
+                <SelectValue placeholder="Select a model" />
+              </SelectTrigger>
+              <SelectContent className="border-zinc-800 bg-zinc-900">
+                {config.models.map((m) => (
+                  <SelectItem
+                    key={`${m.provider}/${m.modelId}`}
+                    value={`${m.provider}/${m.modelId}`}
+                    className="text-xs text-zinc-300"
+                  >
+                    {m.displayName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="mb-3">
             <label className="mb-1.5 block text-[10px] uppercase tracking-widest text-zinc-600">
               Thinking Level
@@ -143,6 +197,7 @@ export default function SettingsModal() {
         <div className="border-t border-zinc-900 pt-4">
           <p className="mb-3 text-[10px] uppercase tracking-widest text-zinc-500">System Prompt</p>
           <Textarea
+            data-testid="system-prompt-input"
             value={systemPrompt}
             onChange={(e) => setSystemPrompt(e.target.value)}
             rows={4}

@@ -15,8 +15,13 @@ function getDisplayPath(call: ToolCall): string {
 
 export default function ToolCallEntry({ call }: Props) {
   return (
-    <div className="flex items-center gap-2 border-l-2 border-zinc-800 py-0.5 pl-4 pr-2 font-mono text-[11px]">
-      <span className="text-zinc-600">▸</span>
+    <div
+      data-testid="tool-call-entry"
+      className="flex items-center gap-2 border-l-2 border-zinc-800 py-0.5 pl-4 pr-2 font-mono text-[11px]"
+    >
+      <span data-testid="tool-call-toggle" className="text-zinc-600">
+        ▸
+      </span>
       <span className="text-zinc-500">{call.toolName}</span>
       <span className="truncate text-emerald-900">{getDisplayPath(call)}</span>
       <span

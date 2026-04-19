@@ -14,13 +14,14 @@ export default function ModelList() {
   }
 
   return (
-    <div className="px-2 pb-2">
+    <div data-testid="model-list" className="px-2 pb-2">
       <p className="mb-1 px-2 text-[10px] uppercase tracking-widest text-zinc-600">Models</p>
       {config.models.map((m) => {
         const selected = m.provider === config.defaultProvider && m.modelId === config.defaultModel
         return (
           <button
             key={`${m.provider}/${m.modelId}`}
+            data-testid={`model-item-${m.modelId}`}
             onClick={() => selectModel(m.provider, m.modelId)}
             className={cn(
               'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition-colors',

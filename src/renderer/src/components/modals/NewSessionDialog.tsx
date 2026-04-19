@@ -54,7 +54,10 @@ export default function NewSessionDialog() {
 
   return (
     <Dialog open={ui.newSessionOpen} onOpenChange={(open) => !open && closeNewSession()}>
-      <DialogContent className="border-zinc-800 bg-[#161616] text-zinc-200 sm:max-w-md">
+      <DialogContent
+        data-testid="new-session-dialog"
+        className="border-zinc-800 bg-[#161616] text-zinc-200 sm:max-w-md"
+      >
         <DialogHeader>
           <DialogTitle className="text-sm font-semibold">New Session</DialogTitle>
         </DialogHeader>
@@ -66,6 +69,7 @@ export default function NewSessionDialog() {
             </label>
             <div className="flex gap-2">
               <Input
+                data-testid="cwd-input"
                 value={cwd}
                 onChange={(e) => setCwd(e.target.value)}
                 className="flex-1 border-zinc-800 bg-zinc-900 text-xs text-zinc-300"
@@ -93,7 +97,10 @@ export default function NewSessionDialog() {
                 setModel(rest.join('/'))
               }}
             >
-              <SelectTrigger className="border-zinc-800 bg-zinc-900 text-xs text-zinc-300">
+              <SelectTrigger
+                data-testid="model-select"
+                className="border-zinc-800 bg-zinc-900 text-xs text-zinc-300"
+              >
                 <SelectValue placeholder="Select a model" />
               </SelectTrigger>
               <SelectContent className="border-zinc-800 bg-zinc-900">
@@ -112,7 +119,10 @@ export default function NewSessionDialog() {
 
           <div className="space-y-1.5">
             <label className="text-[10px] uppercase tracking-widest text-zinc-500">Thinking</label>
-            <div className="flex overflow-hidden rounded-md border border-zinc-800">
+            <div
+              data-testid="thinking-control"
+              className="flex overflow-hidden rounded-md border border-zinc-800"
+            >
               {THINKING_LEVELS.map((level) => (
                 <button
                   key={level}
@@ -131,8 +141,18 @@ export default function NewSessionDialog() {
           </div>
         </div>
 
-        <div className="flex justify-end pt-1">
+        <div className="flex justify-end gap-2 pt-1">
           <Button
+            data-testid="cancel-session-btn"
+            aria-label="Cancel"
+            variant="outline"
+            onClick={closeNewSession}
+            className="border-zinc-800 bg-transparent text-xs text-zinc-500 hover:text-zinc-300"
+          >
+            Cancel
+          </Button>
+          <Button
+            data-testid="start-session-btn"
             aria-label="Start"
             onClick={handleStart}
             disabled={loading || !cwd || !model}

@@ -12,11 +12,12 @@ export default function ProviderList() {
   const openSettings = useStore((s) => s.openSettings)
 
   return (
-    <div className="px-2 pb-2">
+    <div data-testid="provider-list" className="px-2 pb-2">
       <p className="mb-1 px-2 text-[10px] uppercase tracking-widest text-zinc-600">Providers</p>
       {config.providers.map((p) => (
         <button
           key={p.name}
+          data-testid={`provider-item-${p.name.toLowerCase()}`}
           onClick={openSettings}
           className="flex w-full items-center justify-between rounded-md px-2 py-1 text-xs text-zinc-500 transition-colors hover:bg-zinc-900 hover:text-zinc-300"
         >

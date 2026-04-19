@@ -10,11 +10,12 @@ export default function MessageList() {
   )
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto py-4">
+    <div ref={scrollRef} data-testid="message-list" className="flex-1 overflow-y-auto py-4">
       {session.messages.map((msg) => (
         <div key={msg.id}>
           <div className="px-5 py-2">
             <p
+              data-testid={msg.role === 'user' ? 'user-message' : 'assistant-message'}
               className={`mb-1 text-[10px] font-semibold uppercase tracking-widest ${msg.role === 'user' ? 'text-emerald-500' : 'text-blue-400'}`}
             >
               {msg.role === 'user' ? 'You' : 'pi'}

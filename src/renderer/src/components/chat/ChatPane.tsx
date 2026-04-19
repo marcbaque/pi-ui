@@ -8,7 +8,10 @@ import InputArea from './InputArea'
 function EmptyState() {
   const openNewSession = useStore((s) => s.openNewSession)
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-3 text-zinc-700">
+    <div
+      data-testid="chat-empty-state"
+      className="flex flex-1 flex-col items-center justify-center gap-3 text-zinc-700"
+    >
       <span className="text-4xl opacity-30">⌬</span>
       <p className="text-sm font-medium text-zinc-500">No active session</p>
       <p className="max-w-[220px] text-center text-xs text-zinc-700">
