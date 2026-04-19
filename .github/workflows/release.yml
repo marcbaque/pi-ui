@@ -48,10 +48,44 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
+  changelog:
+    name: Update CHANGELOG.md
+    runs-on: ubuntu-latest
+    needs: checks
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate changelog
+        run: pnpm changelogen --output CHANGELOG.md
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git diff --cached --quiet || git commit -m "chore: update changelog for ${{ github.ref_name }}"
+          git push origin HEAD:main
+
   release:
     name: Build and publish .dmg (macOS)
     runs-on: macos-latest
-    needs: checks
+    needs: changelog
 
     steps:
       - name: Checkout
@@ -84,7 +118,7 @@ jobs:
   release-windows:
     name: Build and publish installer (Windows)
     runs-on: windows-latest
-    needs: checks
+    needs: changelog
 
     steps:
       - name: Checkout
