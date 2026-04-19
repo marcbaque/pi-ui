@@ -226,6 +226,39 @@ Full design: `docs/superpowers/specs/2026-04-19-pi-ui-phase1-design.md`
 
 ---
 
+### Phase 1.5 — Release Pipeline
+
+**Deliverable:** Automated GitHub Actions workflow that builds and publishes a signed, notarized `.dmg` on every tagged release. Users can download and run pi-ui without terminal setup.
+
+This ships alongside or immediately after Phase 1 — before Phase 2 work begins — so the release infrastructure is in place from the first usable version.
+
+**Build tooling:**
+- `electron-builder` for packaging and `.dmg` creation
+- Universal binary (Apple Silicon + Intel) via `--universal` flag
+- App icon set (`.icns`)
+
+**GitHub Actions workflow** (`.github/workflows/release.yml`):
+- Triggers on `v*` tags (e.g. `v0.1.0`)
+- Runs on `macos-latest` runner
+- Steps: checkout → install deps → build renderer (Vite) → package with electron-builder → upload `.dmg` as GitHub Release asset
+- Release notes auto-generated from tag annotation
+
+**macOS code signing & notarization:**
+- Requires an Apple Developer account and certificate
+- Certificate stored as `APPLE_CERTIFICATE` GitHub secret (base64-encoded `.p12`)
+- Notarization credentials stored as `APPLE_ID`, `APPLE_TEAM_ID`, `APPLE_APP_PASSWORD` secrets
+- `electron-builder` handles signing and notarization via its `afterSign` hook
+- Without signing, Gatekeeper blocks launch for users who downloaded from the web — signing is required for usable distribution
+
+**Versioning:**
+- Version sourced from `package.json`
+- Tag `v0.1.0` → GitHub Release titled `pi-ui v0.1.0` with `.dmg` attached
+- Pre-release tags (`v0.1.0-beta.1`) create draft/pre-release entries
+
+**Auto-update (future):** `electron-updater` integration deferred — users re-download for now. Can be layered on later using GitHub Releases as the update feed.
+
+---
+
 ### Phase 3 — Quality of Life
 
 **Deliverable:** Polish, productivity shortcuts, ambient awareness.
@@ -465,4 +498,6 @@ pi-ui/
 | 5 | **macOS only (v1)** | Simplifies packaging, native APIs, and testing surface. Cross-platform deferred. |
 | 6 | **Sessions from pi JSONL (read-only)** | pi-ui reads pi's native session format; metadata (name, tags, pin) stored in a separate `.meta.json` sidecar so pi-ui never modifies pi's session files. |
 | 7 | **Phase 1: single session** | Multi-session infrastructure (tab bar, session map) built in Phase 2; Phase 1 validates the core SDK integration with minimal complexity. |
-| 8 | **`pi --mode json` vs `pi --mode rpc`** | `--mode json` is one-shot (prompt on CLI, exits). `--mode rpc` is bidirectional. Both are now superseded by direct SDK use; noted for historical context. |
+| 9 | **electron-builder for packaging** | Standard Electron packaging tool; handles `.dmg` creation, universal binary, code signing, and notarization in one config. |
+| 10 | **Release pipeline after Phase 1** | Ship the build infrastructure before adding features — every subsequent phase has a distributable artifact from day one. |
+| 11 | **Code signing required** | macOS Gatekeeper blocks unsigned apps downloaded from the web. Apple Developer certificate + notarization is a hard requirement for usable distribution. | | `--mode json` is one-shot (prompt on CLI, exits). `--mode rpc` is bidirectional. Both are now superseded by direct SDK use; noted for historical context. |
