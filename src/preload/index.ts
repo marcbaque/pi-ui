@@ -180,7 +180,10 @@ if (process.env['PI_E2E']) {
   const api: PiAPI = {
     session: {
       create: (opts) => ipcRenderer.invoke('session:create', opts),
-      send: (sessionId, message) => ipcRenderer.invoke('session:send', { sessionId, message }),
+      send: (sessionId, message) => {
+        console.log('[preload] session:send', sessionId)
+        return ipcRenderer.invoke('session:send', { sessionId, message })
+      },
       abort: (sessionId) => ipcRenderer.invoke('session:abort', { sessionId }),
       close: (sessionId) => ipcRenderer.invoke('session:close', { sessionId }),
     },
@@ -204,11 +207,16 @@ if (process.env['PI_E2E']) {
         ipcRenderer.invoke('sessions:updateMeta', { sessionId, patch }),
       delete: (sessionId) => ipcRenderer.invoke('sessions:delete', { sessionId }),
       load: (sessionPath) => ipcRenderer.invoke('session:load', { sessionPath }),
-      resume: (sessionPath) => ipcRenderer.invoke('session:resume', { sessionPath }),
+      resume: (sessionPath) => {
+        console.log('[preload] session:resume', sessionPath)
+        return ipcRenderer.invoke('session:resume', { sessionPath })
+      },
     },
     on: <E extends PiEventName>(event: E, handler: (payload: PiEventPayloads[E]) => void) => {
-      const listener = (_: import('electron').IpcRendererEvent, payload: PiEventPayloads[E]) =>
+      const listener = (_: import('electron').IpcRendererEvent, payload: PiEventPayloads[E]) => {
+        console.log('[preload] ipc event received:', event, JSON.stringify(payload).slice(0, 80))
         handler(payload)
+      }
       ipcRenderer.on(event, listener)
       return () => ipcRenderer.removeListener(event, listener)
     },

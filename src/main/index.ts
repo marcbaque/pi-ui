@@ -45,6 +45,25 @@ function createWindow(): void {
 
   win.on('ready-to-show', () => {
     if (!process.env['PI_E2E']) win.show()
+    // Forward main-process logs to renderer DevTools for easier debugging
+    const origLog = console.log.bind(console)
+    const origError = console.error.bind(console)
+    console.log = (...args) => {
+      origLog(...args)
+      if (!win.isDestroyed())
+        win.webContents
+          .executeJavaScript(`console.log('[main]', ${JSON.stringify(args.map(String).join(' '))})`)
+          .catch(() => {})
+    }
+    console.error = (...args) => {
+      origError(...args)
+      if (!win.isDestroyed())
+        win.webContents
+          .executeJavaScript(
+            `console.error('[main]', ${JSON.stringify(args.map(String).join(' '))})`
+          )
+          .catch(() => {})
+    }
   })
 }
 
