@@ -29,6 +29,13 @@ export class IpcBridge {
     this.registerHistory()
   }
 
+  // Safe wrapper: removes any existing handler before registering.
+  // Prevents "already registered" errors on hot-reload in dev mode.
+  private handle(channel: string, handler: Parameters<typeof ipcMain.handle>[1]): void {
+    ipcMain.removeHandler(channel)
+    this.handle(channel, handler)
+  }
+
   sendToRenderer<E extends PiEventName>(event: E, payload: PiEventPayloads[E]): void {
     if (!this.win.isDestroyed()) {
       this.win.webContents.send(event, payload)
@@ -36,7 +43,7 @@ export class IpcBridge {
   }
 
   private registerConfig(): void {
-    ipcMain.handle('config:get', async () => {
+    this.handle('config:get', async () => {
       const [providers, defaults] = await Promise.all([
         this.auth.getProviderStatuses(),
         this.settings.getDefaults(),
@@ -44,14 +51,14 @@ export class IpcBridge {
       return { providers, ...defaults, homedir: homedir() }
     })
 
-    ipcMain.handle(
+    this.handle(
       'config:setApiKey',
       async (_e, { provider, key }: { provider: string; key: string }) => {
         await this.auth.setApiKey(provider, key)
       }
     )
 
-    ipcMain.handle(
+    this.handle(
       'config:setDefaults',
       async (_e, opts: Parameters<SettingsService['setDefaults']>[0]) => {
         await this.settings.setDefaults(opts)
@@ -60,13 +67,13 @@ export class IpcBridge {
   }
 
   private registerModels(): void {
-    ipcMain.handle('models:list', async () => {
+    this.handle('models:list', async () => {
       return this.models.listAvailable()
     })
   }
 
   private registerSession(): void {
-    ipcMain.handle('session:create', async (_e, opts) => {
+    this.handle('session:create', async (_e, opts) => {
       try {
         return await this.sessions.createSession(opts, (event, payload) => {
           this.sendToRenderer(event, payload)
@@ -77,7 +84,7 @@ export class IpcBridge {
       }
     })
 
-    ipcMain.handle(
+    this.handle(
       'session:send',
       async (_e, { sessionId, message }: { sessionId: string; message: string }) => {
         try {
@@ -89,17 +96,17 @@ export class IpcBridge {
       }
     )
 
-    ipcMain.handle('session:abort', async (_e, { sessionId }: { sessionId: string }) => {
+    this.handle('session:abort', async (_e, { sessionId }: { sessionId: string }) => {
       await this.sessions.abort(sessionId)
     })
 
-    ipcMain.handle('session:close', (_e, { sessionId }: { sessionId: string }) => {
+    this.handle('session:close', (_e, { sessionId }: { sessionId: string }) => {
       this.sessions.closeSession(sessionId)
     })
   }
 
   private registerDialog(): void {
-    ipcMain.handle('dialog:openDirectory', async () => {
+    this.handle('dialog:openDirectory', async () => {
       const result = await dialog.showOpenDialog(this.win, {
         properties: ['openDirectory'],
         title: 'Select working directory',
@@ -112,13 +119,13 @@ export class IpcBridge {
   }
 
   private registerShell(): void {
-    ipcMain.handle('shell:openPath', (_e, { path }: { path: string }) => {
+    this.handle('shell:openPath', (_e, { path }: { path: string }) => {
       shell.openPath(path)
     })
   }
 
   private registerHistory(): void {
-    ipcMain.handle('sessions:list', async () => {
+    this.handle('sessions:list', async () => {
       try {
         const activeIds = this.sessions.getActiveSessionIds()
         return await this.store.list(activeIds)
@@ -128,7 +135,7 @@ export class IpcBridge {
       }
     })
 
-    ipcMain.handle(
+    this.handle(
       'sessions:updateMeta',
       async (
         _e,
@@ -141,15 +148,15 @@ export class IpcBridge {
       }
     )
 
-    ipcMain.handle('sessions:delete', async (_e, { sessionId }: { sessionId: string }) => {
+    this.handle('sessions:delete', async (_e, { sessionId }: { sessionId: string }) => {
       await this.store.deleteMetaById(sessionId)
     })
 
-    ipcMain.handle('session:load', async (_e, { sessionPath }: { sessionPath: string }) => {
+    this.handle('session:load', async (_e, { sessionPath }: { sessionPath: string }) => {
       return this.store.load(sessionPath)
     })
 
-    ipcMain.handle('session:resume', async (_e, { sessionPath }: { sessionPath: string }) => {
+    this.handle('session:resume', async (_e, { sessionPath }: { sessionPath: string }) => {
       const { sessionId, sdkSession } = await this.store.resume(
         sessionPath,
         this.models,
