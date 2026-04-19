@@ -12,10 +12,7 @@ export default function Sidebar() {
       data-testid="sidebar"
       className="flex h-full w-56 shrink-0 flex-col overflow-hidden border-r border-zinc-900 bg-[#0a0a0a]"
     >
-      <div className="flex items-center justify-between border-b border-zinc-900 px-3 py-3">
-        <span className="text-sm font-bold tracking-tight text-white">
-          <span className="text-emerald-400">pi</span>-ui
-        </span>
+      <div className="flex items-center justify-end border-b border-zinc-900 px-3 py-3">
         <button
           data-testid="new-session-btn"
           aria-label="New session"
