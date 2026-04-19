@@ -11,7 +11,10 @@ export default function Sidebar() {
       data-testid="sidebar"
       className="flex h-full w-56 shrink-0 flex-col overflow-hidden border-r border-[var(--pi-border-subtle)] bg-[var(--pi-sidebar-bg)]"
     >
-      <div className="border-b border-[var(--pi-border-subtle)] px-3 py-3" />
+      <div
+        className="border-b border-[var(--pi-border-subtle)] px-3 py-3"
+        style={{ WebkitAppRegion: 'drag' } as never}
+      />
 
       <SessionList />
 
