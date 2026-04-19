@@ -1,0 +1,44 @@
+// src/renderer/src/components/sidebar/Sidebar.tsx
+import { Plus, Settings } from 'lucide-react'
+import { useStore } from '@/store'
+import ModelList from './ModelList'
+import ProviderList from './ProviderList'
+
+export default function Sidebar() {
+  const openNewSession = useStore((s) => s.openNewSession)
+  const openSettings = useStore((s) => s.openSettings)
+
+  return (
+    <aside className="flex h-full w-56 shrink-0 flex-col overflow-hidden border-r border-zinc-900 bg-[#0a0a0a]">
+      <div className="flex items-center justify-between border-b border-zinc-900 px-3 py-3">
+        <span className="text-sm font-bold tracking-tight text-white">
+          <span className="text-emerald-400">pi</span>-ui
+        </span>
+        <button
+          aria-label="New session"
+          onClick={openNewSession}
+          className="flex h-6 w-6 items-center justify-center rounded text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+        >
+          <Plus size={14} />
+        </button>
+      </div>
+
+      <div className="flex-1 space-y-4 overflow-y-auto py-2">
+        <ModelList />
+        <ProviderList />
+      </div>
+
+      <div className="border-t border-zinc-900 p-2">
+        <button
+          aria-label="Settings"
+          onClick={openSettings}
+          className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs text-zinc-500 transition-colors hover:bg-zinc-900 hover:text-zinc-300"
+        >
+          <Settings size={13} />
+          Settings
+          <span className="ml-auto text-[10px] text-zinc-700">⌘,</span>
+        </button>
+      </div>
+    </aside>
+  )
+}
