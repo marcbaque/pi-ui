@@ -63,6 +63,7 @@ export default function SettingsModal() {
       defaultModel: m || null,
       defaultProvider: p || null,
     })
+    closeSettings()
   }
 
   const apiKeyProviders = config.providers.filter((p) => p.authType === 'apikey')
