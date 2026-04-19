@@ -67,13 +67,36 @@ export class SessionService {
           args: event.args as Record<string, unknown>,
         })
       } else if (event.type === 'tool_execution_end') {
-        const result =
-          typeof event.result === 'string' ? event.result : JSON.stringify(event.result)
+        const rawResult = event.result as
+          | {
+              content?: Array<{ type: string; text?: string }>
+              details?: { truncation?: unknown; fullOutputPath?: string }
+            }
+          | string
+        let resultText: string
+        let details: import('@shared/types').ToolResultDetails | null = null
+        if (typeof rawResult === 'string') {
+          resultText = rawResult
+        } else if (rawResult && Array.isArray(rawResult.content)) {
+          resultText = rawResult.content
+            .filter((c) => c.type === 'text')
+            .map((c) => c.text ?? '')
+            .join('')
+          if (rawResult.details) {
+            details = {
+              truncation: rawResult.details.truncation as unknown as string,
+              fullOutputPath: rawResult.details.fullOutputPath,
+            }
+          }
+        } else {
+          resultText = JSON.stringify(rawResult)
+        }
         onEvent('pi:tool-end', {
           sessionId,
           toolCallId: event.toolCallId,
           toolName: event.toolName,
-          result,
+          result: resultText,
+          details,
           isError: event.isError,
           durationMs: 0,
         })
@@ -92,8 +115,9 @@ export class SessionService {
     await this.getOrThrow(sessionId).session.prompt(message)
   }
 
-  async abort(sessionId: string): Promise<void> {
+  async abort(sessionId: string, onEvent: EventCallback): Promise<void> {
     await this.getOrThrow(sessionId).session.abort()
+    onEvent('pi:idle', { sessionId })
   }
 
   closeSession(sessionId: string): void {

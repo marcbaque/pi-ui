@@ -179,6 +179,7 @@ export class SessionStore {
             toolName: c.name ?? '',
             args: c.arguments ?? {},
             result: null,
+            details: null,
             isError: false,
             durationMs: null,
             status: 'done' as const,

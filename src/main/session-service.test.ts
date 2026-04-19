@@ -109,7 +109,7 @@ describe('SessionService', () => {
         },
         onEvent
       )
-      await service.abort(sessionId)
+      await service.abort(sessionId, onEvent)
       expect(mockAbort).toHaveBeenCalled()
     })
   })

@@ -97,7 +97,7 @@ export class IpcBridge {
     )
 
     this.handle('session:abort', async (_e, { sessionId }: { sessionId: string }) => {
-      await this.sessions.abort(sessionId)
+      await this.sessions.abort(sessionId, (event, payload) => this.sendToRenderer(event, payload))
     })
 
     this.handle('session:close', (_e, { sessionId }: { sessionId: string }) => {
