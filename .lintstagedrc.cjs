@@ -3,7 +3,7 @@ module.exports = {
   'src/**/*.{ts,tsx}': (files) => {
     const escaped = files.map((f) => `"${f}"`).join(' ')
     return [
-      `bash -c 'ESLINT_USE_FLAT_CONFIG=false npx eslint --fix --max-warnings 0 ${escaped}'`,
+      `npx eslint --fix --max-warnings 0 ${escaped}`,
       `npx prettier --write ${escaped}`,
     ]
   },
