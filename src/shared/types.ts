@@ -74,6 +74,13 @@ export interface TabDiff {
   unifiedDiff: string
 }
 
+export interface SlashCommand {
+  name: string
+  description: string
+  source: 'builtin' | 'skill' | 'prompt' | 'extension'
+  insertText: string
+}
+
 export interface ToolCall {
   id: string
   toolName: string
@@ -144,8 +151,11 @@ export interface PiAPI {
       model: string
       provider: string
       thinkingLevel: AppThinkingLevel
+      name?: string
     }): Promise<{ sessionId: string }>
     send(sessionId: string, message: string): Promise<void>
+    steer(sessionId: string, message: string): Promise<void>
+    listCommands(sessionId: string): Promise<SlashCommand[]>
     abort(sessionId: string): Promise<void>
     close(sessionId: string): Promise<void>
   }
@@ -173,6 +183,7 @@ export interface PiAPI {
     delete(sessionId: string): Promise<void>
     load(sessionPath: string): Promise<Message[]>
     resume(sessionPath: string): Promise<{ sessionId: string }>
+    setName(sdkSessionId: string, name: string): Promise<void>
   }
   on<E extends PiEventName>(event: E, handler: (payload: PiEventPayloads[E]) => void): () => void
   update: {
