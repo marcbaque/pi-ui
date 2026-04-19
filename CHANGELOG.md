@@ -2,6 +2,24 @@
 
 Release notes are auto-generated from commit messages on each tagged release. See the [Releases](https://github.com/marcbaque/pi-ui/releases) page for the full history.
 
+## v0.2.1...main
+
+[compare changes](https://github.com/marcbaque/pi-ui/compare/v0.2.1...main)
+
+### 📖 Documentation
+
+- Add README for open source users ([b604d7b](https://github.com/marcbaque/pi-ui/commit/b604d7b))
+- Add CONTRIBUTING, CHANGELOG, issue templates, PR template ([f155c12](https://github.com/marcbaque/pi-ui/commit/f155c12))
+
+### 🏡 Chore
+
+- Gitignore docs/ and .superpowers/; remove docs from tracking ([4d9e8c9](https://github.com/marcbaque/pi-ui/commit/4d9e8c9))
+- Remove .superpowers/ from git tracking ([99c4850](https://github.com/marcbaque/pi-ui/commit/99c4850))
+
+### ❤️ Contributors
+
+- Marc Baqué <marc.baque@factorial.co>
+
 ## v0.2.1
 
 - Windows build support (x64 NSIS installer)

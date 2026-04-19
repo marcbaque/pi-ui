@@ -18,7 +18,8 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,json,css}\"",
     "check": "pnpm typecheck && pnpm lint && pnpm test:run",
     "prepare": "husky",
-    "dist": "electron-vite build && electron-builder --universal",
+    "changelog": "changelogen --output CHANGELOG.md",
+    "release": "changelogen --output CHANGELOG.md && git add CHANGELOG.md && git commit -m 'chore: update changelog' || true",
     "dist:dir": "electron-vite build && electron-builder --dir --universal",
     "dist:win": "electron-vite build && electron-builder --win",
     "e2e": "playwright test",
@@ -68,6 +69,7 @@
     "@vitejs/plugin-react": "^4.7.0",
     "@vitest/coverage-v8": "^4.1.4",
     "autoprefixer": "^10.5.0",
+    "changelogen": "^0.6.2",
     "electron": "^41.2.1",
     "electron-builder": "^26.8.1",
     "electron-vite": "^5.0.0",
@@ -119,8 +121,18 @@
     },
     "win": {
       "target": [
-        { "target": "nsis", "arch": ["x64"] },
-        { "target": "zip",  "arch": ["x64"] }
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "icon": "build/icon.ico"
     },
