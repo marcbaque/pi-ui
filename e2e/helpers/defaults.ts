@@ -12,6 +12,8 @@ export const DEFAULT_CONFIG: AppConfig = {
   defaultProvider: 'Anthropic',
   defaultThinkingLevel: 'off',
   systemPrompt: '',
+  homedir: '/Users/test',
+  defaultWorkingDirectory: null,
 }
 
 export const DEFAULT_MODELS: ModelEntry[] = [

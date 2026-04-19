@@ -5,7 +5,8 @@ import type { Page } from '@playwright/test'
 
 export const sidebar = {
   root: (page: Page) => page.locator('[data-testid="sidebar"]'),
-  newSessionBtn: (page: Page) => page.locator('[data-testid="new-session-btn"]').first(),
+  // + button moved to tab bar in Session C
+  newSessionBtn: (page: Page) => page.locator('[data-testid="tab-bar-new-btn"]').first(),
   modelList: (page: Page) => page.locator('[data-testid="model-list"]'),
   modelItem: (page: Page, modelId: string) =>
     page.locator(`[data-testid="model-item-${modelId}"]`),
@@ -64,4 +65,20 @@ export const sessionHistory = {
   renameInput: (page: Page) => page.locator('[data-testid="rename-input"]'),
   resumeBar: (page: Page) => page.locator('[data-testid="resume-bar"]'),
   resumeBtn: (page: Page) => page.locator('[data-testid="resume-btn"]'),
+}
+
+export const tabs = {
+  bar: (page: Page) => page.locator('[data-testid="tab-bar"]'),
+  newBtn: (page: Page) => page.locator('[data-testid="tab-bar-new-btn"]'),
+  tab: (page: Page, sessionId: string) => page.locator(`[data-testid="tab-${sessionId}"]`),
+  tabByIndex: (page: Page, index: number) => page.locator('[data-testid^="tab-"]').nth(index),
+  closeBtn: (page: Page, sessionId: string) =>
+    page.locator(`[data-testid="tab-${sessionId}"] [data-testid="tab-close-btn"]`),
+  statusDot: (page: Page, sessionId: string) =>
+    page.locator(`[data-testid="tab-${sessionId}"] [data-testid="tab-status-dot"]`),
+  label: (page: Page, sessionId: string) =>
+    page.locator(`[data-testid="tab-${sessionId}"] [data-testid="tab-label"]`),
+  confirmDialog: (page: Page) => page.locator('[data-testid="tab-close-confirm-dialog"]'),
+  confirmBtn: (page: Page) => page.locator('[data-testid="tab-close-confirm-btn"]'),
+  cancelBtn: (page: Page) => page.locator('[data-testid="tab-close-cancel-btn"]'),
 }

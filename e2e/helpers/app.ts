@@ -109,7 +109,16 @@ export async function getLastSessionId(page: Page): Promise<string> {
 
 /** Start a session via the New Session Dialog. Returns the sessionId. */
 export async function startSession(page: Page): Promise<string> {
-  await page.click('[data-testid="new-session-btn"]')
+  // If no tabs exist yet, the empty state has a "New session" button.
+  // If tabs exist, use the tab bar + button.
+  const emptyBtn = page.locator('[data-testid="chat-empty-state"] button')
+  const tabBarBtn = page.locator('[data-testid="tab-bar-new-btn"]')
+  const hasEmpty = await emptyBtn.isVisible().catch(() => false)
+  if (hasEmpty) {
+    await emptyBtn.click()
+  } else {
+    await tabBarBtn.click()
+  }
   await page.click('[data-testid="start-session-btn"]')
   return getLastSessionId(page)
 }
