@@ -1,10 +1,15 @@
 // src/renderer/src/App.tsx
 import { useEffect } from 'react'
 import { useStore } from './store'
+import Sidebar from './components/sidebar/Sidebar'
+import ChatPane from './components/chat/ChatPane'
+import NewSessionDialog from './components/modals/NewSessionDialog'
+import SettingsModal from './components/modals/SettingsModal'
 
 export default function App() {
   const setConfig = useStore((s) => s.setConfig)
   const setModels = useStore((s) => s.setModels)
+  const openSettings = useStore((s) => s.openSettings)
 
   useEffect(() => {
     Promise.all([window.pi.config.get(), window.pi.models.list()])
@@ -15,14 +20,23 @@ export default function App() {
       .catch(console.error)
   }, [setConfig, setModels])
 
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === ',') {
+        e.preventDefault()
+        openSettings()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [openSettings])
+
   return (
     <div className="flex h-screen overflow-hidden bg-background text-foreground">
-      {/* Sidebar placeholder — filled in Plan 5 */}
-      <div className="w-56 shrink-0 border-r border-border bg-[#0a0a0a]" />
-      {/* Chat area placeholder — filled in Plan 5 */}
-      <div className="flex flex-1 flex-col items-center justify-center">
-        <p className="text-sm text-muted-foreground">pi-ui</p>
-      </div>
+      <Sidebar />
+      <ChatPane />
+      <NewSessionDialog />
+      <SettingsModal />
     </div>
   )
 }
