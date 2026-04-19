@@ -15,8 +15,6 @@ import type {
   PiEventName,
   PiEventPayloads,
 } from '@shared/types'
-import type { ModelService } from './model-service'
-import type { SettingsService } from './settings-service'
 
 type EventCallback = <E extends PiEventName>(event: E, payload: PiEventPayloads[E]) => void
 
@@ -95,18 +93,16 @@ export class SessionStore {
 
   async resume(
     sessionPath: string,
-    _modelService: ModelService,
-    _settingsService: SettingsService,
+    model: unknown,
     _onEvent: EventCallback
   ): Promise<{ sessionId: string; sdkSession: unknown }> {
     const manager = SessionManager.open(sessionPath)
     const cwd = manager.getCwd()
     const loader = new DefaultResourceLoader({ cwd })
-    const { session } = await createAgentSession({
-      cwd,
-      resourceLoader: loader,
-      sessionManager: manager,
-    })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const opts: any = { cwd, resourceLoader: loader, sessionManager: manager }
+    if (model) opts.model = model
+    const { session } = await createAgentSession(opts)
     const sessionId = randomUUID()
     return { sessionId, sdkSession: session }
   }

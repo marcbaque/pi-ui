@@ -130,7 +130,9 @@ if (process.env['PI_E2E']) {
       updateMeta: async () => {},
       delete: async () => {},
       load: async (_sessionPath: string) => MOCK_LOADED_MESSAGES,
-      resume: async (_sessionPath: string) => ({ sessionId: `test-session-${++sessionCounter}` }),
+      resume: async (_sessionPath: string, _modelId?: string) => ({
+        sessionId: `test-session-${++sessionCounter}`,
+      }),
     },
     on: (event, handler) => {
       if (!handlers.has(event)) handlers.set(event, new Set())
@@ -207,9 +209,9 @@ if (process.env['PI_E2E']) {
         ipcRenderer.invoke('sessions:updateMeta', { sessionId, patch }),
       delete: (sessionId) => ipcRenderer.invoke('sessions:delete', { sessionId }),
       load: (sessionPath) => ipcRenderer.invoke('session:load', { sessionPath }),
-      resume: (sessionPath) => {
-        console.log('[preload] session:resume', sessionPath)
-        return ipcRenderer.invoke('session:resume', { sessionPath })
+      resume: (sessionPath, modelId) => {
+        console.log('[preload] session:resume', sessionPath, 'model:', modelId)
+        return ipcRenderer.invoke('session:resume', { sessionPath, modelId })
       },
     },
     on: <E extends PiEventName>(event: E, handler: (payload: PiEventPayloads[E]) => void) => {

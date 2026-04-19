@@ -159,28 +159,31 @@ export class IpcBridge {
       return this.store.load(sessionPath)
     })
 
-    this.handle('session:resume', async (_e, { sessionPath }: { sessionPath: string }) => {
-      try {
-        const { sessionId, sdkSession } = await this.store.resume(
-          sessionPath,
-          this.models,
-          this.settings,
-          (event, payload) => this.sendToRenderer(event, payload)
-        )
-        const manager = (sdkSession as { sessionManager?: { getSessionId(): string } })
-          .sessionManager
-        const sdkSessionId = manager?.getSessionId() ?? sessionId
-        this.sessions.registerResumedSession(
-          sessionId,
-          sdkSession,
-          sdkSessionId,
-          (event, payload) => this.sendToRenderer(event, payload)
-        )
-        return { sessionId }
-      } catch (err) {
-        console.error('[session:resume] failed:', err)
-        throw err
+    this.handle(
+      'session:resume',
+      async (_e, { sessionPath, modelId }: { sessionPath: string; modelId?: string }) => {
+        try {
+          const model = modelId ? this.models.findModelById(modelId) : undefined
+          const { sessionId, sdkSession } = await this.store.resume(
+            sessionPath,
+            model,
+            (event, payload) => this.sendToRenderer(event, payload)
+          )
+          const manager = (sdkSession as { sessionManager?: { getSessionId(): string } })
+            .sessionManager
+          const sdkSessionId = manager?.getSessionId() ?? sessionId
+          this.sessions.registerResumedSession(
+            sessionId,
+            sdkSession,
+            sdkSessionId,
+            (event, payload) => this.sendToRenderer(event, payload)
+          )
+          return { sessionId }
+        } catch (err) {
+          console.error('[session:resume] failed:', err)
+          throw err
+        }
       }
-    })
+    )
   }
 }

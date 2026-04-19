@@ -24,7 +24,10 @@ export default function ResumeBar({ tabId }: Props) {
     setLoading(true)
     setError(null)
     try {
-      const { sessionId } = await window.pi.sessions.resume(session.path)
+      const { sessionId } = await window.pi.sessions.resume(
+        session.path,
+        session.model ?? undefined
+      )
       replaceTab(tabId, {
         id: sessionId,
         sessionId,

@@ -24,4 +24,8 @@ export class ModelService {
   findModel(provider: string, modelId: string) {
     return this.registry.find(provider, modelId)
   }
+
+  findModelById(modelId: string) {
+    return this.registry.getAvailable().find((m) => m.id === modelId)
+  }
 }
