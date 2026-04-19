@@ -8,3 +8,7 @@ build/icon.png
 build/icon.iconset/
 playwright-report/
 test-results/
+
+# Internal planning docs
+.superpowers/
+docs/
