@@ -2,6 +2,10 @@
 
 Release notes are auto-generated from commit messages on each tagged release. See the [Releases](https://github.com/marcbaque/pi-ui/releases) page for the full history.
 
+## v0.2.2...v0.2.2
+
+[compare changes](https://github.com/marcbaque/pi-ui/compare/v0.2.2...v0.2.2)
+
 ## v0.2.1...main
 
 [compare changes](https://github.com/marcbaque/pi-ui/compare/v0.2.1...main)
