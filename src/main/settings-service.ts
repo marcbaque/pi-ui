@@ -9,6 +9,7 @@ interface SettingsJson {
   defaultModel?: string | null
   defaultThinkingLevel?: string
   defaultSystemPrompt?: string
+  defaultWorkingDirectory?: string | null
   [key: string]: unknown
 }
 
@@ -23,6 +24,7 @@ export class SettingsService {
       defaultThinkingLevel:
         (settings.defaultThinkingLevel as AppThinkingLevel | undefined) ?? 'low',
       systemPrompt: settings.defaultSystemPrompt ?? '',
+      defaultWorkingDirectory: settings.defaultWorkingDirectory ?? null,
     }
   }
 
@@ -33,6 +35,8 @@ export class SettingsService {
     if (patch.defaultThinkingLevel !== undefined)
       settings.defaultThinkingLevel = patch.defaultThinkingLevel
     if (patch.systemPrompt !== undefined) settings.defaultSystemPrompt = patch.systemPrompt
+    if (patch.defaultWorkingDirectory !== undefined)
+      settings.defaultWorkingDirectory = patch.defaultWorkingDirectory
     await mkdir(dirname(SETTINGS_PATH), { recursive: true })
     await writeFile(SETTINGS_PATH, JSON.stringify(settings, null, 2), 'utf-8')
   }

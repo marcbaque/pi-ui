@@ -143,6 +143,7 @@ describe('config slice', () => {
       defaultThinkingLevel: 'low',
       systemPrompt: '',
       homedir: '/Users/test',
+      defaultWorkingDirectory: null,
     })
     expect(getStore().config.providers).toHaveLength(1)
     expect(getStore().config.defaultModel).toBe('claude')

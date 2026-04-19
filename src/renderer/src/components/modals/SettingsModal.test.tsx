@@ -46,6 +46,7 @@ describe('SettingsModal', () => {
       defaultThinkingLevel: 'low',
       systemPrompt: '',
       homedir: '/Users/test',
+      defaultWorkingDirectory: null,
     })
     render(<SettingsModal />)
     const input = screen.getByPlaceholderText(/sk-ant/i)

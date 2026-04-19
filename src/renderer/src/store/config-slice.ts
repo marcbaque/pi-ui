@@ -7,6 +7,7 @@ export interface ConfigState {
   defaultProvider: string | null
   defaultThinkingLevel: AppConfig['defaultThinkingLevel']
   systemPrompt: string
+  defaultWorkingDirectory: string | null
   homedir: string
   models: ModelEntry[]
 }
@@ -22,6 +23,7 @@ export const initialConfigState: ConfigState = {
   defaultProvider: null,
   defaultThinkingLevel: 'low',
   systemPrompt: '',
+  defaultWorkingDirectory: null,
   homedir: '',
   models: [],
 }

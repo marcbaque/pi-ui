@@ -24,6 +24,7 @@ export interface AppConfig {
   defaultThinkingLevel: AppThinkingLevel
   systemPrompt: string
   homedir: string
+  defaultWorkingDirectory: string | null
 }
 
 export interface AppDefaults {
@@ -31,6 +32,7 @@ export interface AppDefaults {
   defaultProvider: string | null
   defaultThinkingLevel: AppThinkingLevel
   systemPrompt: string
+  defaultWorkingDirectory: string | null
 }
 
 export interface Preferences {

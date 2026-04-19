@@ -22,7 +22,7 @@ export default function NewSessionDialog() {
   const closeNewSession = useStore((s) => s.closeNewSession)
   const setSessionActive = useStore((s) => s.setSessionActive)
 
-  const [cwd, setCwd] = useState('~')
+  const [cwd, setCwd] = useState(config.defaultWorkingDirectory ?? '~')
   const [model, setModel] = useState(config.defaultModel ?? '')
   const [provider, setProvider] = useState(config.defaultProvider ?? '')
   const [thinking, setThinking] = useState<AppThinkingLevel>(config.defaultThinkingLevel)

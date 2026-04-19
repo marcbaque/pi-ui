@@ -33,6 +33,7 @@ describe('NewSessionDialog', () => {
       defaultThinkingLevel: 'low',
       systemPrompt: '',
       homedir: '/Users/test',
+      defaultWorkingDirectory: null,
     })
   })
 

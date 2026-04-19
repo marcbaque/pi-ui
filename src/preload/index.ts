@@ -25,6 +25,7 @@ if (process.env['PI_E2E']) {
     defaultThinkingLevel: 'off',
     systemPrompt: '',
     homedir: '/Users/test',
+    defaultWorkingDirectory: null,
   }
 
   const DEFAULT_MODELS: ModelEntry[] = [
@@ -109,6 +110,7 @@ if (process.env['PI_E2E']) {
         ...DEFAULT_CONFIG,
         providers: DEFAULT_CONFIG.providers.map((p) => ({ ...p })),
         homedir: '/Users/test',
+        defaultWorkingDirectory: null,
       }),
       setApiKey: async () => {},
       setDefaults: async () => {},

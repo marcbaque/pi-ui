@@ -26,6 +26,9 @@ export default function SettingsModal() {
 
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({})
   const [systemPrompt, setSystemPrompt] = useState(config.systemPrompt)
+  const [defaultWorkingDirectory, setDefaultWorkingDirectory] = useState(
+    config.defaultWorkingDirectory ?? ''
+  )
   const [thinking, setThinking] = useState<AppThinkingLevel>(config.defaultThinkingLevel)
   const [defaultModel, setDefaultModel] = useState(
     config.defaultModel && config.defaultProvider
@@ -55,6 +58,7 @@ export default function SettingsModal() {
       systemPrompt,
       defaultModel: m || null,
       defaultProvider: p || null,
+      defaultWorkingDirectory: defaultWorkingDirectory || null,
     })
     setConfig({
       ...config,
@@ -62,6 +66,7 @@ export default function SettingsModal() {
       systemPrompt,
       defaultModel: m || null,
       defaultProvider: p || null,
+      defaultWorkingDirectory: defaultWorkingDirectory || null,
     })
     closeSettings()
   }
@@ -195,6 +200,30 @@ export default function SettingsModal() {
                   {level}
                 </button>
               ))}
+            </div>
+          </div>
+          <div className="mb-3">
+            <label className="mb-1.5 block text-[10px] uppercase tracking-widest text-zinc-600">
+              Default Working Directory
+            </label>
+            <div className="flex gap-2">
+              <Input
+                value={defaultWorkingDirectory}
+                onChange={(e) => setDefaultWorkingDirectory(e.target.value)}
+                placeholder="~/code/my-project"
+                className="flex-1 border-zinc-800 bg-zinc-900 font-mono text-xs text-zinc-300"
+              />
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={async () => {
+                  const dir = await window.pi.dialog.openDirectory()
+                  if (dir) setDefaultWorkingDirectory(dir)
+                }}
+                className="shrink-0 border border-zinc-800 text-zinc-500 hover:text-zinc-300"
+              >
+                Browse
+              </Button>
             </div>
           </div>
         </div>

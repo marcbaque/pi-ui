@@ -43,6 +43,7 @@ describe('SettingsService', () => {
         defaultModel: 'claude-sonnet-4.6',
         defaultThinkingLevel: 'low',
         systemPrompt: 'Be concise.',
+        defaultWorkingDirectory: null,
       })
     })
 
@@ -56,6 +57,7 @@ describe('SettingsService', () => {
         defaultModel: null,
         defaultThinkingLevel: 'low',
         systemPrompt: '',
+        defaultWorkingDirectory: null,
       })
     })
   })
