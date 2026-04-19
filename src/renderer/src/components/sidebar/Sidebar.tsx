@@ -1,8 +1,7 @@
 // src/renderer/src/components/sidebar/Sidebar.tsx
 import { Plus, Settings } from 'lucide-react'
 import { useStore } from '@/store'
-import ModelList from './ModelList'
-import ProviderList from './ProviderList'
+import SessionList from './SessionList'
 
 export default function Sidebar() {
   const openNewSession = useStore((s) => s.openNewSession)
@@ -27,10 +26,7 @@ export default function Sidebar() {
         </button>
       </div>
 
-      <div className="flex-1 space-y-4 overflow-y-auto py-2">
-        <ModelList />
-        <ProviderList />
-      </div>
+      <SessionList />
 
       <div className="border-t border-zinc-900 p-2">
         <button

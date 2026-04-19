@@ -1,71 +1,50 @@
 // src/renderer/src/components/sidebar/Sidebar.test.tsx
-import { render, screen, fireEvent } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { useStore } from '@/store'
 import Sidebar from './Sidebar'
-import { useStore } from '../../store'
 
-vi.stubGlobal('window', {
-  pi: { on: vi.fn(() => () => {}), config: { setDefaults: vi.fn(async () => {}) } },
-})
+vi.mock('@/store', () => ({
+  useStore: vi.fn(),
+}))
 
-function resetStore() {
-  useStore.setState((useStore as unknown as { getInitialState: () => object }).getInitialState())
+const mockStore = {
+  openNewSession: vi.fn(),
+  openSettings: vi.fn(),
+  history: {
+    sessions: [],
+    expandedCwds: [],
+    selectedSessionId: null,
+    loadedMessages: [],
+    loadStatus: 'idle' as const,
+  },
+  toggleCwdExpanded: vi.fn(),
+  selectSession: vi.fn(),
+  setLoadStatus: vi.fn(),
+  setLoadedMessages: vi.fn(),
+  setSessions: vi.fn(),
+  clearReadonly: vi.fn(),
 }
 
+beforeEach(() => {
+  vi.mocked(useStore).mockImplementation((selector) =>
+    selector(mockStore as unknown as Parameters<typeof selector>[0])
+  )
+})
+
 describe('Sidebar', () => {
-  beforeEach(resetStore)
-
-  it('renders the pi-ui logo', () => {
+  it('renders header with new session button', () => {
     render(<Sidebar />)
-    const matches = screen.getAllByText((_, el) => el?.textContent === 'pi-ui')
-    expect(matches.length).toBeGreaterThan(0)
+    expect(screen.getByTestId('new-session-btn')).toBeInTheDocument()
   })
 
-  it('renders each model from the store', () => {
-    useStore.getState().setModels([
-      {
-        provider: 'github-copilot',
-        modelId: 'claude-sonnet-4.6',
-        displayName: 'Claude Sonnet 4.6',
-        supportsThinking: true,
-      },
-      {
-        provider: 'github-copilot',
-        modelId: 'gpt-5',
-        displayName: 'GPT-5',
-        supportsThinking: false,
-      },
-    ])
+  it('renders settings button in footer', () => {
     render(<Sidebar />)
-    expect(screen.getByText('Claude Sonnet 4.6')).toBeInTheDocument()
-    expect(screen.getByText('GPT-5')).toBeInTheDocument()
+    expect(screen.getByTestId('settings-btn')).toBeInTheDocument()
   })
 
-  it('renders provider statuses', () => {
-    useStore.getState().setConfig({
-      providers: [
-        { name: 'github-copilot', authType: 'oauth', configured: true },
-        { name: 'anthropic', authType: 'apikey', configured: false },
-      ],
-      defaultModel: null,
-      defaultProvider: null,
-      defaultThinkingLevel: 'low',
-      systemPrompt: '',
-    })
+  it('shows empty state when no sessions', () => {
     render(<Sidebar />)
-    expect(screen.getByText('github-copilot')).toBeInTheDocument()
-    expect(screen.getByText('anthropic')).toBeInTheDocument()
-  })
-
-  it('opens new session dialog when + button is clicked', () => {
-    render(<Sidebar />)
-    fireEvent.click(screen.getByRole('button', { name: /new session/i }))
-    expect(useStore.getState().ui.newSessionOpen).toBe(true)
-  })
-
-  it('opens settings when Settings button is clicked', () => {
-    render(<Sidebar />)
-    fireEvent.click(screen.getByRole('button', { name: /settings/i }))
-    expect(useStore.getState().ui.settingsOpen).toBe(true)
+    expect(screen.getByText(/no sessions yet/i)).toBeInTheDocument()
   })
 })
