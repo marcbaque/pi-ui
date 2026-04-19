@@ -19,6 +19,7 @@ function createWindow(): void {
     show: false,
     titleBarStyle: 'hiddenInset',
     backgroundColor: '#0f0f0f',
+    icon: join(__dirname, '../../build/icon.icns'),
     webPreferences: {
       preload: join(__dirname, '../preload/index.mjs'),
       sandbox: false,
