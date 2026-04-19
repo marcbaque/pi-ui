@@ -191,11 +191,11 @@ export default function ToolCallEntry({ call }: Props) {
         </span>
       </div>
 
-      {/* Bash: last N lines preview */}
-      {isBash && hasResult && expanded && <BashOutput result={call.result!} expanded={expanded} />}
+      {/* Bash: last N lines preview, always visible; expanded = show all */}
+      {isBash && hasResult && <BashOutput result={call.result!} expanded={expanded} />}
 
-      {/* Edit/write: diff view */}
-      {isEdit && hasResult && expanded && <DiffOutput result={call.result!} />}
+      {/* Edit/write: diff view, always visible when done */}
+      {isEdit && hasResult && <DiffOutput result={call.result!} />}
 
       {/* Other tools */}
       {!isBash && !isEdit && canToggle && expanded && (
