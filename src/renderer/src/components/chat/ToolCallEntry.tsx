@@ -57,7 +57,7 @@ export default function ToolCallEntry({ call }: Props) {
           {call.toolName}
         </span>
         {displayPath && (
-          <span className="flex-1 truncate text-left" style={{ color: 'var(--pi-dim)' }}>
+          <span className="flex-1 truncate text-left" style={{ color: 'var(--pi-dim-dark)' }}>
             {displayPath}
           </span>
         )}

@@ -35,7 +35,7 @@ function UserMessage({ msg }: { msg: Message }) {
 
 function AssistantMessage({ content, streaming }: { content: string; streaming?: boolean }) {
   return (
-    <div data-testid="assistant-message" className="px-4 py-1.5">
+    <div data-testid="assistant-message" className="mx-3 py-1.5">
       <PiMarkdown>{content}</PiMarkdown>
       {streaming && (
         <span
