@@ -101,6 +101,8 @@ if (process.env['PI_E2E']) {
     session: {
       create: async () => ({ sessionId: `test-session-${++sessionCounter}` }),
       send: async () => {},
+      steer: async () => {},
+      listCommands: async () => [],
       abort: async (sessionId) => {
         emit('pi:idle', { sessionId })
       },
@@ -138,6 +140,7 @@ if (process.env['PI_E2E']) {
       resume: async (_sessionPath: string) => ({
         sessionId: `test-session-${++sessionCounter}`,
       }),
+      setName: async () => {},
     },
     on: (event, handler) => {
       if (!handlers.has(event)) handlers.set(event, new Set())
@@ -204,6 +207,8 @@ if (process.env['PI_E2E']) {
     session: {
       create: (opts) => ipcRenderer.invoke('session:create', opts),
       send: (sessionId, message) => ipcRenderer.invoke('session:send', { sessionId, message }),
+      steer: (sessionId, message) => ipcRenderer.invoke('session:steer', { sessionId, message }),
+      listCommands: (sessionId) => ipcRenderer.invoke('session:listCommands', { sessionId }),
       abort: (sessionId) => ipcRenderer.invoke('session:abort', { sessionId }),
       close: (sessionId) => ipcRenderer.invoke('session:close', { sessionId }),
     },
@@ -229,6 +234,7 @@ if (process.env['PI_E2E']) {
       delete: (sessionId) => ipcRenderer.invoke('sessions:delete', { sessionId }),
       load: (sessionPath) => ipcRenderer.invoke('session:load', { sessionPath }),
       resume: (sessionPath) => ipcRenderer.invoke('session:resume', { sessionPath }),
+      setName: (sessionId, name) => ipcRenderer.invoke('sessions:setName', { sessionId, name }),
     },
     on: <E extends PiEventName>(event: E, handler: (payload: PiEventPayloads[E]) => void) => {
       const listener = (_: import('electron').IpcRendererEvent, payload: PiEventPayloads[E]) =>

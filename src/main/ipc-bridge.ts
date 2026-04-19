@@ -105,6 +105,27 @@ export class IpcBridge {
       }
     )
 
+    this.handle(
+      'session:steer',
+      async (_e, { sessionId, message }: { sessionId: string; message: string }) => {
+        try {
+          await this.sessions.steer(sessionId, message)
+        } catch (err) {
+          console.error('[session:steer]', err)
+          throw err
+        }
+      }
+    )
+
+    this.handle('session:listCommands', (_e, { sessionId }: { sessionId: string }) => {
+      try {
+        return this.sessions.listCommands(sessionId)
+      } catch (err) {
+        console.error('[session:listCommands]', err)
+        throw err
+      }
+    })
+
     this.handle('session:abort', async (_e, { sessionId }: { sessionId: string }) => {
       await this.sessions.abort(sessionId, (event, payload) => this.sendToRenderer(event, payload))
     })
@@ -179,6 +200,13 @@ export class IpcBridge {
     this.handle('sessions:delete', async (_e, { sessionId }: { sessionId: string }) => {
       await this.store.deleteMetaById(sessionId)
     })
+
+    this.handle(
+      'sessions:setName',
+      async (_e, { sessionId, name }: { sessionId: string; name: string }) => {
+        await this.store.setNameById(sessionId, name)
+      }
+    )
 
     this.handle('session:load', async (_e, { sessionPath }: { sessionPath: string }) => {
       return this.store.load(sessionPath)
