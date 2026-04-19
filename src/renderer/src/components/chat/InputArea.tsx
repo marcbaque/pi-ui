@@ -38,7 +38,7 @@ export default function InputArea() {
   }
 
   return (
-    <div className="border-t border-zinc-900 bg-[#0a0a0a] px-3 py-3">
+    <div className="border-t border-[var(--pi-border-subtle)] bg-[var(--pi-sidebar-bg)] px-3 py-3">
       <div className="relative rounded-lg border border-zinc-800 bg-zinc-900 focus-within:border-zinc-700">
         <textarea
           ref={textareaRef}
@@ -86,19 +86,63 @@ export default function InputArea() {
           </div>
         )}
       </div>
-      <div className="mt-1.5 flex items-center gap-3 px-1">
+      <div
+        className="mt-1.5 flex items-center gap-2 px-1 font-mono text-[10px]"
+        style={{ color: 'var(--pi-dim)' }}
+      >
+        {/* Status */}
         <span
-          className={`flex items-center gap-1.5 text-[11px] ${session.status === 'thinking' ? 'text-amber-600' : session.status === 'error' ? 'text-red-600' : 'text-zinc-700'}`}
+          data-testid="status-dot"
+          className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+            session.status === 'thinking' ? 'animate-pulse' : ''
+          }`}
+          style={{
+            backgroundColor:
+              session.status === 'thinking'
+                ? 'var(--pi-warning)'
+                : session.status === 'error'
+                  ? 'var(--pi-error)'
+                  : 'var(--pi-success)',
+          }}
+        />
+        <span
+          data-testid="status-text"
+          style={{
+            color:
+              session.status === 'thinking'
+                ? 'var(--pi-warning)'
+                : session.status === 'error'
+                  ? 'var(--pi-error)'
+                  : 'var(--pi-dim)',
+          }}
         >
-          <span
-            data-testid="status-dot"
-            className={`h-1.5 w-1.5 rounded-full ${session.status === 'thinking' ? 'animate-pulse bg-amber-500' : session.status === 'error' ? 'bg-red-500' : 'bg-emerald-700'}`}
-          />
-          <span data-testid="status-text">{session.status}</span>
+          {session.status}
         </span>
-        <span className="ml-auto text-[11px] text-zinc-700">
-          {session.model} · {session.cwd}
-        </span>
+
+        {/* Model + thinking */}
+        {session.model && (
+          <>
+            <span style={{ color: 'var(--pi-dim-dark)' }}>·</span>
+            <span style={{ color: 'var(--pi-accent)' }}>{session.model}</span>
+            {session.thinkingLevel && session.thinkingLevel !== 'off' && (
+              <span style={{ color: 'var(--pi-dim)' }}>• {session.thinkingLevel}</span>
+            )}
+          </>
+        )}
+
+        {/* CWD */}
+        {session.cwd && (
+          <>
+            <span style={{ color: 'var(--pi-dim-dark)' }}>·</span>
+            <button
+              onClick={() => window.pi.shell.openPath(session.cwd!)}
+              className="truncate hover:underline"
+              style={{ color: 'var(--pi-dim)', maxWidth: '200px' }}
+            >
+              {session.cwd.replace(process.env.HOME ?? '/Users', '~')}
+            </button>
+          </>
+        )}
       </div>
     </div>
   )

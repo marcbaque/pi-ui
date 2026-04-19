@@ -2,21 +2,56 @@
 
 @theme {
   /* Map Tailwind color utilities to our CSS custom properties */
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-background: var(--pi-bg);
+  --color-foreground: var(--pi-text);
+  --color-muted: var(--pi-tool-pending-bg);
+  --color-muted-foreground: var(--pi-dim);
+  --color-border: var(--pi-border-subtle);
+  --color-input: var(--pi-tool-pending-bg);
+  --color-ring: var(--pi-accent);
+  --color-primary: var(--pi-accent);
+  --color-primary-foreground: var(--pi-bg);
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+
+  /* Pi theme colors as Tailwind utilities */
+  --color-pi-bg: var(--pi-bg);
+  --color-pi-sidebar-bg: var(--pi-sidebar-bg);
+  --color-pi-user-msg-bg: var(--pi-user-msg-bg);
+  --color-pi-tool-pending-bg: var(--pi-tool-pending-bg);
+  --color-pi-tool-success-bg: var(--pi-tool-success-bg);
+  --color-pi-tool-error-bg: var(--pi-tool-error-bg);
+  --color-pi-accent: var(--pi-accent);
+  --color-pi-border: var(--pi-border);
+  --color-pi-border-accent: var(--pi-border-accent);
+  --color-pi-dim: var(--pi-dim);
+  --color-pi-dim-dark: var(--pi-dim-dark);
+  --color-pi-success: var(--pi-success);
+  --color-pi-error: var(--pi-error);
+  --color-pi-warning: var(--pi-warning);
 }
 
 :root {
+  /* Pi dark theme — sourced from pi-coding-agent dark.json */
+  --pi-bg: #18181e;
+  --pi-sidebar-bg: #111116;
+  --pi-text: #e0e0e0;
+  --pi-user-msg-bg: #343541;
+  --pi-tool-pending-bg: #282832;
+  --pi-tool-success-bg: #283228;
+  --pi-tool-error-bg: #3c2828;
+  --pi-accent: #8abeb7;
+  --pi-border: #5f87ff;
+  --pi-border-accent: #00d7ff;
+  --pi-border-subtle: #2a2a36;
+  --pi-dim: #808080;
+  --pi-dim-dark: #505050;
+  --pi-success: #b5bd68;
+  --pi-error: #cc6666;
+  --pi-warning: #e5c07b;
+
+  /* shadcn/radix compat */
   --background: 0 0% 6%;
   --foreground: 0 0% 88%;
   --muted: 0 0% 12%;
@@ -37,8 +72,8 @@
 
 body {
   margin: 0;
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
+  background-color: var(--pi-bg);
+  color: var(--pi-text);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -46,4 +81,151 @@ body {
 #root {
   height: 100vh;
   overflow: hidden;
+}
+
+/* ── Markdown rendering in chat messages ──────────────────────────────────── */
+.pi-markdown {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--pi-text);
+  word-break: break-word;
+}
+
+.pi-markdown p {
+  margin: 0 0 0.5rem;
+}
+.pi-markdown p:last-child {
+  margin-bottom: 0;
+}
+
+.pi-markdown h1,
+.pi-markdown h2,
+.pi-markdown h3,
+.pi-markdown h4,
+.pi-markdown h5,
+.pi-markdown h6 {
+  color: #f0c674;
+  font-weight: 600;
+  margin: 0.75rem 0 0.25rem;
+  line-height: 1.3;
+}
+.pi-markdown h1 {
+  font-size: 1.1rem;
+}
+.pi-markdown h2 {
+  font-size: 1rem;
+}
+.pi-markdown h3,
+.pi-markdown h4 {
+  font-size: 0.875rem;
+}
+
+.pi-markdown a {
+  color: #81a2be;
+  text-decoration: underline;
+}
+.pi-markdown a:hover {
+  color: var(--pi-border-accent);
+}
+
+.pi-markdown code {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  background: rgba(138, 190, 183, 0.12);
+  color: var(--pi-accent);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+}
+
+.pi-markdown pre {
+  background: #1a1a22;
+  border: 1px solid var(--pi-border-subtle);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+
+.pi-markdown pre code {
+  background: none;
+  color: var(--pi-success);
+  padding: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.pi-markdown blockquote {
+  border-left: 3px solid var(--pi-dim);
+  margin: 0.5rem 0;
+  padding: 0 0.75rem;
+  color: var(--pi-dim);
+}
+
+.pi-markdown ul,
+.pi-markdown ol {
+  margin: 0.25rem 0 0.5rem 1.25rem;
+  padding: 0;
+}
+.pi-markdown li {
+  margin-bottom: 0.15rem;
+}
+.pi-markdown li::marker {
+  color: var(--pi-accent);
+}
+
+.pi-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  margin: 0.5rem 0;
+}
+.pi-markdown th,
+.pi-markdown td {
+  border: 1px solid var(--pi-border-subtle);
+  padding: 0.3rem 0.6rem;
+  text-align: left;
+}
+.pi-markdown th {
+  background: var(--pi-tool-pending-bg);
+  color: var(--pi-accent);
+}
+
+.pi-markdown hr {
+  border: none;
+  border-top: 1px solid var(--pi-border-subtle);
+  margin: 0.75rem 0;
+}
+
+/* Syntax highlighting overrides (rehype-highlight uses highlight.js classes) */
+.hljs {
+  background: transparent !important;
+}
+.hljs-keyword,
+.hljs-built_in {
+  color: #569cd6;
+}
+.hljs-string {
+  color: #ce9178;
+}
+.hljs-number {
+  color: #b5cea8;
+}
+.hljs-comment {
+  color: #6a9955;
+}
+.hljs-function,
+.hljs-title {
+  color: #dcdcaa;
+}
+.hljs-variable,
+.hljs-params {
+  color: #9cdcfe;
+}
+.hljs-type,
+.hljs-class {
+  color: #4ec9b0;
+}
+.hljs-attr,
+.hljs-attribute {
+  color: #9cdcfe;
 }

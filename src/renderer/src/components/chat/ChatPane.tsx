@@ -20,7 +20,7 @@ function EmptyState() {
       </p>
       <button
         onClick={openNewSession}
-        className="mt-2 rounded-md border border-zinc-800 bg-zinc-900 px-4 py-1.5 text-xs text-emerald-500 transition-colors hover:bg-zinc-800"
+        className="mt-2 rounded-md border border-zinc-800 bg-zinc-900 px-4 py-1.5 text-xs text-[var(--pi-success)] transition-colors hover:bg-zinc-800"
       >
         ＋ New session
       </button>

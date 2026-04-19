@@ -36,14 +36,14 @@ export default function ResumeBar() {
   return (
     <div
       data-testid="resume-bar"
-      className="flex items-center justify-between border-t border-zinc-900 bg-[#0a0a0a] px-4 py-3"
+      className="flex items-center justify-between border-t border-[var(--pi-border-subtle)] bg-[var(--pi-sidebar-bg)] px-4 py-3"
     >
       <span className="text-xs text-zinc-600">This is a past session</span>
       <button
         data-testid="resume-btn"
         onClick={handleResume}
         disabled={loading}
-        className="rounded-md bg-emerald-950 px-3 py-1.5 text-xs text-emerald-400 transition-colors hover:bg-emerald-900 disabled:opacity-50"
+        className="rounded-md bg-[var(--pi-tool-success-bg)] px-3 py-1.5 text-xs text-[var(--pi-accent)] transition-colors hover:bg-emerald-900 disabled:opacity-50"
       >
         {loading ? 'Resuming…' : 'Resume →'}
       </button>

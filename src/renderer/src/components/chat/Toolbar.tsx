@@ -39,7 +39,7 @@ export default function Toolbar() {
   return (
     <div
       data-testid="chat-toolbar"
-      className="flex items-center gap-3 border-b border-zinc-900 bg-[#0a0a0a] px-3 py-2"
+      className="flex items-center gap-3 border-b border-[var(--pi-border-subtle)] bg-[var(--pi-sidebar-bg)] px-3 py-2"
     >
       <Select value={`${session.provider}/${session.model}`} onValueChange={handleModelChange}>
         <SelectTrigger className="h-7 w-48 border-zinc-800 bg-zinc-900 text-xs text-zinc-400">
@@ -68,7 +68,7 @@ export default function Toolbar() {
             className={cn(
               'px-2 py-0.5 text-[10px] capitalize transition-colors',
               session.thinkingLevel === level
-                ? 'bg-emerald-950 text-emerald-400'
+                ? 'bg-[var(--pi-tool-success-bg)] text-[var(--pi-accent)]'
                 : 'text-zinc-600 hover:text-zinc-400'
             )}
           >

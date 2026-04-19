@@ -10,9 +10,9 @@ export default function Sidebar() {
   return (
     <aside
       data-testid="sidebar"
-      className="flex h-full w-56 shrink-0 flex-col overflow-hidden border-r border-zinc-900 bg-[#0a0a0a]"
+      className="flex h-full w-56 shrink-0 flex-col overflow-hidden border-r border-[var(--pi-border-subtle)] bg-[var(--pi-sidebar-bg)]"
     >
-      <div className="flex items-center justify-end border-b border-zinc-900 px-3 py-3">
+      <div className="flex items-center justify-end border-b border-[var(--pi-border-subtle)] px-3 py-3">
         <button
           data-testid="new-session-btn"
           aria-label="New session"
@@ -25,7 +25,7 @@ export default function Sidebar() {
 
       <SessionList />
 
-      <div className="border-t border-zinc-900 p-2">
+      <div className="border-t border-[var(--pi-border-subtle)] p-2">
         <button
           data-testid="settings-btn"
           aria-label="Settings"
