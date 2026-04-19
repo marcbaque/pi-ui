@@ -121,7 +121,7 @@ export class SessionService {
     const entry = this.sessions.get(sessionId)
     if (!entry)
       throw new Error(
-        `[SessionService.send] not found: ${sessionId}. Known: ${[...this.sessions.keys()].join(',')}`
+        `Session not found: ${sessionId}. Known: ${[...this.sessions.keys()].join(',')}`
       )
     await entry.session.prompt(message)
   }
