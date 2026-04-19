@@ -8,6 +8,7 @@ import { SettingsService } from './settings-service'
 import { PreferencesService } from './preferences-service'
 import { SessionService } from './session-service'
 import { IpcBridge } from './ipc-bridge'
+import { SessionStore } from './session-store'
 
 // Enable remote debugging so agent-browser can connect via CDP
 app.commandLine.appendSwitch('remote-debugging-port', '9223')
@@ -35,7 +36,8 @@ function createWindow(): void {
   const prefs = new PreferencesService(app.getPath('userData'))
   const sessions = new SessionService(models, settings)
 
-  const bridge = new IpcBridge(win, auth, models, settings, prefs, sessions)
+  const store = new SessionStore()
+  const bridge = new IpcBridge(win, auth, models, settings, prefs, sessions, store)
   bridge.register()
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {

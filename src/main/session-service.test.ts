@@ -26,7 +26,7 @@ vi.mock('@mariozechner/pi-coding-agent', () => ({
   DefaultResourceLoader: vi.fn().mockImplementation(function () {
     return {}
   }),
-  SessionManager: { create: vi.fn() },
+  SessionManager: { create: vi.fn(() => ({ getSessionId: () => 'sdk-session-1' })) },
 }))
 
 const fakeModel = {

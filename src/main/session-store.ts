@@ -20,7 +20,7 @@ import type { SettingsService } from './settings-service'
 
 type EventCallback = <E extends PiEventName>(event: E, payload: PiEventPayloads[E]) => void
 
-type FsLike = Pick<typeof fs, 'existsSync' | 'readFileSync' | 'writeFileSync' | 'mkdirSync'>
+export type FsLike = Pick<typeof fs, 'existsSync' | 'readFileSync' | 'writeFileSync' | 'mkdirSync'>
 
 export class SessionStore {
   private readonly pathById = new Map<string, string>()

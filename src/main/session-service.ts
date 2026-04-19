@@ -16,6 +16,7 @@ type SdkSession = Awaited<ReturnType<typeof createAgentSession>>['session']
 interface ActiveSession {
   session: SdkSession
   unsubscribe: () => void
+  sdkSessionId: string
 }
 
 export interface CreateSessionOpts {
@@ -42,12 +43,15 @@ export class SessionService {
 
     const loader = new DefaultResourceLoader({ cwd: opts.cwd })
 
+    const sessionManager = SessionManager.create(opts.cwd)
+    const sdkSessionId = sessionManager.getSessionId()
+
     const { session } = await createAgentSession({
       cwd: opts.cwd,
       model,
       thinkingLevel: opts.thinkingLevel,
       resourceLoader: loader,
-      sessionManager: SessionManager.create(opts.cwd),
+      sessionManager,
     })
 
     const sessionId = randomUUID()
@@ -80,7 +84,7 @@ export class SessionService {
       }
     })
 
-    this.sessions.set(sessionId, { session, unsubscribe })
+    this.sessions.set(sessionId, { session, unsubscribe, sdkSessionId })
     return { sessionId }
   }
 
@@ -98,6 +102,15 @@ export class SessionService {
     entry.unsubscribe()
     entry.session.dispose()
     this.sessions.delete(sessionId)
+  }
+
+  getActiveSessionIds(): string[] {
+    return Array.from(this.sessions.values()).map((s) => s.sdkSessionId)
+  }
+
+  registerResumedSession(sessionId: string, sdkSession: unknown, sdkSessionId: string): void {
+    const session = sdkSession as SdkSession
+    this.sessions.set(sessionId, { session, unsubscribe: () => {}, sdkSessionId })
   }
 
   private getOrThrow(sessionId: string): ActiveSession {

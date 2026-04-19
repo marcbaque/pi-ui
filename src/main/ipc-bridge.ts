@@ -5,6 +5,7 @@ import type { ModelService } from './model-service'
 import type { SettingsService } from './settings-service'
 import type { PreferencesService } from './preferences-service'
 import type { SessionService } from './session-service'
+import { SessionStore } from './session-store'
 import type { PiEventName, PiEventPayloads } from '@shared/types'
 
 export class IpcBridge {
@@ -14,7 +15,8 @@ export class IpcBridge {
     private readonly models: ModelService,
     private readonly settings: SettingsService,
     private readonly prefs: PreferencesService,
-    private readonly sessions: SessionService
+    private readonly sessions: SessionService,
+    private readonly store: SessionStore
   ) {}
 
   register(): void {
@@ -23,6 +25,7 @@ export class IpcBridge {
     this.registerSession()
     this.registerDialog()
     this.registerShell()
+    this.registerHistory()
   }
 
   sendToRenderer<E extends PiEventName>(event: E, payload: PiEventPayloads[E]): void {
@@ -100,6 +103,47 @@ export class IpcBridge {
   private registerShell(): void {
     ipcMain.handle('shell:openPath', (_e, { path }: { path: string }) => {
       shell.openPath(path)
+    })
+  }
+
+  private registerHistory(): void {
+    ipcMain.handle('sessions:list', async () => {
+      const activeIds = this.sessions.getActiveSessionIds()
+      return this.store.list(activeIds)
+    })
+
+    ipcMain.handle(
+      'sessions:updateMeta',
+      async (
+        _e,
+        {
+          sessionId,
+          patch,
+        }: { sessionId: string; patch: Partial<{ tags: string[]; pinned: boolean }> }
+      ) => {
+        await this.store.updateMetaById(sessionId, patch)
+      }
+    )
+
+    ipcMain.handle('sessions:delete', async (_e, { sessionId }: { sessionId: string }) => {
+      await this.store.deleteMetaById(sessionId)
+    })
+
+    ipcMain.handle('session:load', async (_e, { sessionPath }: { sessionPath: string }) => {
+      return this.store.load(sessionPath)
+    })
+
+    ipcMain.handle('session:resume', async (_e, { sessionPath }: { sessionPath: string }) => {
+      const { sessionId, sdkSession } = await this.store.resume(
+        sessionPath,
+        this.models,
+        this.settings,
+        (event, payload) => this.sendToRenderer(event, payload)
+      )
+      const manager = (sdkSession as { sessionManager?: { getSessionId(): string } }).sessionManager
+      const sdkSessionId = manager?.getSessionId() ?? sessionId
+      this.sessions.registerResumedSession(sessionId, sdkSession, sdkSessionId)
+      return { sessionId }
     })
   }
 }

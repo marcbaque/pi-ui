@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { SessionStore } from './session-store'
+import { SessionStore, type FsLike } from './session-store'
 
 vi.mock('@mariozechner/pi-coding-agent', () => ({
   SessionManager: {
@@ -23,7 +23,7 @@ describe('SessionStore', () => {
   let store: SessionStore
 
   beforeEach(() => {
-    store = new SessionStore(mockFs as Parameters<typeof SessionStore>[0])
+    store = new SessionStore(mockFs as FsLike)
     vi.clearAllMocks()
     mockFs.existsSync.mockReturnValue(false)
     mockFs.readFileSync.mockReturnValue('{}')
