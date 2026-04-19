@@ -15,19 +15,34 @@ import {
 } from './config-slice'
 import { initialUiState, createUiSlice, type UiState, type UiActions } from './ui-slice'
 
-type AppStore = { session: SessionState; config: ConfigState; ui: UiState } & SessionActions &
+import {
+  initialHistoryState,
+  createHistorySlice,
+  type HistoryState,
+  type HistoryActions,
+} from './history-slice'
+
+type AppStore = {
+  session: SessionState
+  config: ConfigState
+  ui: UiState
+  history: HistoryState
+} & SessionActions &
   ConfigActions &
-  UiActions
+  UiActions &
+  HistoryActions
 
 const initialState = {
   session: initialSessionState,
   config: initialConfigState,
   ui: initialUiState,
+  history: initialHistoryState,
 }
 
 export const useStore = create<AppStore>()(
   immer((set) => ({
     ...initialState,
+    ...createHistorySlice(set as Parameters<typeof createHistorySlice>[0]),
     ...createSessionSlice(set as Parameters<typeof createSessionSlice>[0]),
     ...createConfigSlice(set as Parameters<typeof createConfigSlice>[0]),
     ...createUiSlice(set as Parameters<typeof createUiSlice>[0]),
@@ -40,4 +55,5 @@ export const useStore = create<AppStore>()(
   session: { ...initialSessionState, messages: [] },
   config: { ...initialConfigState, providers: [], models: [] },
   ui: { ...initialUiState },
+  history: { ...initialHistoryState },
 })
