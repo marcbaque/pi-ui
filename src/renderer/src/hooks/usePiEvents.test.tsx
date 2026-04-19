@@ -21,22 +21,33 @@ function resetStore() {
   useStore.setState((useStore as unknown as { getInitialState: () => object }).getInitialState())
 }
 
+const MOCK_TAB = {
+  id: 'sess-1',
+  sessionId: 'sess-1',
+  cwd: '/code',
+  model: 'claude',
+  provider: 'anthropic',
+  thinkingLevel: 'low' as const,
+  status: 'idle' as const,
+  messages: [],
+  currentStreamingContent: '',
+  mode: 'active' as const,
+}
+
+function getTab() {
+  return useStore.getState().tabs.tabs.find((t) => t.id === 'sess-1')!
+}
+
 describe('usePiEvents', () => {
   beforeEach(() => {
     resetStore()
     vi.clearAllMocks()
     Object.keys(handlers).forEach((k) => delete handlers[k])
-    useStore.getState().setSessionActive({
-      sessionId: 'sess-1',
-      cwd: '/code',
-      model: 'claude',
-      provider: 'anthropic',
-      thinkingLevel: 'low',
-    })
+    useStore.getState().createTab(MOCK_TAB)
   })
 
   it('registers listeners for all pi events on mount', () => {
-    renderHook(() => usePiEvents('sess-1'))
+    renderHook(() => usePiEvents())
     expect(mockOn).toHaveBeenCalledWith('pi:token', expect.any(Function))
     expect(mockOn).toHaveBeenCalledWith('pi:tool-start', expect.any(Function))
     expect(mockOn).toHaveBeenCalledWith('pi:tool-end', expect.any(Function))
@@ -45,37 +56,37 @@ describe('usePiEvents', () => {
   })
 
   it('appends token on pi:token event', () => {
-    renderHook(() => usePiEvents('sess-1'))
+    renderHook(() => usePiEvents())
     act(() => {
       handlers['pi:token']({ sessionId: 'sess-1', delta: 'Hello' })
     })
-    expect(useStore.getState().session.currentStreamingContent).toBe('Hello')
+    expect(getTab().currentStreamingContent).toBe('Hello')
   })
 
-  it('sets status to thinking on pi:token when idle', () => {
-    renderHook(() => usePiEvents('sess-1'))
+  it('sets status to thinking on pi:token', () => {
+    renderHook(() => usePiEvents())
     act(() => {
       handlers['pi:token']({ sessionId: 'sess-1', delta: 'x' })
     })
-    expect(useStore.getState().session.status).toBe('thinking')
+    expect(getTab().status).toBe('thinking')
   })
 
   it('finalizes message and sets idle on pi:idle', () => {
-    renderHook(() => usePiEvents('sess-1'))
+    renderHook(() => usePiEvents())
     act(() => {
       handlers['pi:token']({ sessionId: 'sess-1', delta: 'Done!' })
     })
     act(() => {
       handlers['pi:idle']({ sessionId: 'sess-1' })
     })
-    const msgs = useStore.getState().session.messages
-    expect(msgs).toHaveLength(1)
-    expect(msgs[0].content).toBe('Done!')
-    expect(useStore.getState().session.status).toBe('idle')
+    const tab = getTab()
+    expect(tab.messages).toHaveLength(1)
+    expect(tab.messages[0].content).toBe('Done!')
+    expect(tab.status).toBe('idle')
   })
 
   it('adds a pending tool call on pi:tool-start', () => {
-    renderHook(() => usePiEvents('sess-1'))
+    renderHook(() => usePiEvents())
     act(() => {
       handlers['pi:token']({ sessionId: 'sess-1', delta: 'reading...' })
     })
@@ -93,15 +104,23 @@ describe('usePiEvents', () => {
         args: { path: 'x.ts' },
       })
     })
-    const lastMsg = useStore.getState().session.messages.at(-1)!
+    const lastMsg = getTab().messages.at(-1)!
     expect(lastMsg.toolCalls.some((c) => c.id === 't1' && c.status === 'pending')).toBe(true)
   })
 
-  it('ignores events for a different sessionId', () => {
-    renderHook(() => usePiEvents('sess-1'))
+  it('sets status to error on pi:error', () => {
+    renderHook(() => usePiEvents())
+    act(() => {
+      handlers['pi:error']({ sessionId: 'sess-1' })
+    })
+    expect(getTab().status).toBe('error')
+  })
+
+  it('ignores events for a sessionId with no matching tab', () => {
+    renderHook(() => usePiEvents())
     act(() => {
       handlers['pi:token']({ sessionId: 'OTHER', delta: 'ignore me' })
     })
-    expect(useStore.getState().session.currentStreamingContent).toBe('')
+    expect(getTab().currentStreamingContent).toBe('')
   })
 })
