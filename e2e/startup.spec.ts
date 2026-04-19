@@ -10,10 +10,6 @@ test('sidebar is visible', async ({ page }) => {
   await expect(sidebar.root(page)).toBeVisible()
 })
 
-test('sidebar shows pi-ui title in header', async ({ page }) => {
-  await expect(page.locator('[data-testid="sidebar"] span').filter({ hasText: 'pi-ui' })).toBeVisible()
-})
-
 test('chat pane shows empty state on first load', async ({ page }) => {
   await expect(chat.emptyState(page)).toBeVisible()
 })

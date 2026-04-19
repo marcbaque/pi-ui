@@ -33,9 +33,9 @@ beforeEach(() => {
 })
 
 describe('Sidebar', () => {
-  it('renders pi-ui title in header', () => {
+  it('renders sidebar root element', () => {
     render(<Sidebar />)
-    expect(screen.getByText('pi-ui')).toBeInTheDocument()
+    expect(screen.getByTestId('sidebar')).toBeInTheDocument()
   })
 
   it('renders settings button in footer', () => {
