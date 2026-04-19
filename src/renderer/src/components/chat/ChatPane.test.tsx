@@ -5,10 +5,20 @@ import ChatPane from './ChatPane'
 import { useStore } from '../../store'
 
 const mockSend = vi.fn(async () => {})
+const mockSteer = vi.fn(async () => {})
 const mockAbort = vi.fn(async () => {})
+const mockListCommands = vi.fn(async () => [
+  { name: 'compact', description: 'Compress context', source: 'builtin', insertText: '/compact' },
+  {
+    name: 'skill:brainstorming',
+    description: 'Brainstorm',
+    source: 'skill',
+    insertText: '/skill:brainstorming',
+  },
+])
 
 vi.stubGlobal('pi', {
-  session: { send: mockSend, abort: mockAbort },
+  session: { send: mockSend, steer: mockSteer, listCommands: mockListCommands, abort: mockAbort },
   shell: { openPath: vi.fn() },
   on: vi.fn(() => () => {}),
 })
@@ -83,5 +93,57 @@ describe('ChatPane', () => {
     useStore.getState().addUserMessage('s1', 'hello')
     render(<ChatPane />)
     expect(screen.getByText('hello')).toBeInTheDocument()
+  })
+
+  it('calls session.steer (not send) when tab is thinking', async () => {
+    useStore.getState().createTab({ ...MOCK_TAB, status: 'thinking' })
+    render(<ChatPane />)
+    const input = screen.getByTestId('chat-input')
+    fireEvent.change(input, { target: { value: 'stop that' } })
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' })
+    await waitFor(() => expect(mockSteer).toHaveBeenCalledWith('s1', 'stop that'))
+    expect(mockSend).not.toHaveBeenCalled()
+  })
+
+  it('shows steering label in status bar when thinking', () => {
+    useStore.getState().createTab({ ...MOCK_TAB, status: 'thinking' })
+    render(<ChatPane />)
+    expect(screen.getByTestId('steering-label')).toBeInTheDocument()
+  })
+
+  it('textarea is not disabled when thinking', () => {
+    useStore.getState().createTab({ ...MOCK_TAB, status: 'thinking' })
+    render(<ChatPane />)
+    const input = screen.getByTestId('chat-input')
+    expect(input).not.toBeDisabled()
+  })
+
+  it('shows slash command menu when input starts with /', async () => {
+    useStore.getState().createTab(MOCK_TAB)
+    render(<ChatPane />)
+    const input = screen.getByTestId('chat-input')
+    fireEvent.change(input, { target: { value: '/' } })
+    await waitFor(() => expect(mockListCommands).toHaveBeenCalledWith('s1'))
+    expect(screen.getByRole('listbox')).toBeInTheDocument()
+  })
+
+  it('inserts command insertText when a slash command is selected', async () => {
+    useStore.getState().createTab(MOCK_TAB)
+    render(<ChatPane />)
+    const input = screen.getByTestId('chat-input')
+    fireEvent.change(input, { target: { value: '/' } })
+    await waitFor(() => screen.getByRole('listbox'))
+    fireEvent.mouseDown(screen.getAllByRole('option')[0])
+    expect((input as HTMLTextAreaElement).value).toBe('/compact')
+  })
+
+  it('hides slash command menu when input no longer starts with /', async () => {
+    useStore.getState().createTab(MOCK_TAB)
+    render(<ChatPane />)
+    const input = screen.getByTestId('chat-input')
+    fireEvent.change(input, { target: { value: '/' } })
+    await waitFor(() => screen.getByRole('listbox'))
+    fireEvent.change(input, { target: { value: 'hello' } })
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
   })
 })
