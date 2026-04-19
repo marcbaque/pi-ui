@@ -116,6 +116,25 @@ export class IpcBridge {
       await this.prefs.set({ lastUsedDirectory: dir })
       return dir
     })
+
+    this.handle('dialog:pickFile', async () => {
+      const result = await dialog.showOpenDialog(this.win, {
+        properties: ['openFile'],
+        title: 'Attach file',
+      })
+      if (result.canceled || result.filePaths.length === 0) return null
+      const filePath = result.filePaths[0]
+      const { readFile } = await import('fs/promises')
+      const { basename } = await import('path')
+      const buf = await readFile(filePath)
+      if (buf.length > 512 * 1024) throw new Error('File too large (max 500KB)')
+      // Binary detection: look for null bytes in first 8KB
+      const sample = buf.slice(0, 8192)
+      for (let i = 0; i < sample.length; i++) {
+        if (sample[i] === 0) throw new Error('Binary files are not supported')
+      }
+      return { path: filePath, name: basename(filePath), content: buf.toString('utf-8') }
+    })
   }
 
   private registerShell(): void {

@@ -28,6 +28,9 @@ const MOCK_TAB = {
   messages: [],
   currentStreamingContent: '',
   mode: 'active' as const,
+  diffPaneOpen: false,
+  currentDiff: null,
+  diffComments: [],
 }
 
 describe('ChatPane', () => {

@@ -77,6 +77,9 @@ export default function SessionList() {
       currentStreamingContent: '',
       mode: 'loading',
       readonlySessionId: session.id,
+      diffPaneOpen: false,
+      currentDiff: null,
+      diffComments: [],
     })
 
     try {

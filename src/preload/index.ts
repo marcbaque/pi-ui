@@ -121,6 +121,11 @@ if (process.env['PI_E2E']) {
     },
     dialog: {
       openDirectory: async () => '/tmp/test-project',
+      pickFile: async () => ({
+        path: '/tmp/test-project/example.ts',
+        name: 'example.ts',
+        content: 'export const hello = "world"\n',
+      }),
     },
     shell: {
       openPath: async () => {},
@@ -196,6 +201,7 @@ if (process.env['PI_E2E']) {
     },
     dialog: {
       openDirectory: () => ipcRenderer.invoke('dialog:openDirectory'),
+      pickFile: () => ipcRenderer.invoke('dialog:pickFile'),
     },
     shell: {
       openPath: (path) => ipcRenderer.invoke('shell:openPath', { path }),

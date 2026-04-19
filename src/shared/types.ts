@@ -61,6 +61,19 @@ export interface ToolResultDetails {
   exitCode?: number | null
 }
 
+export interface DiffComment {
+  id: string
+  lineIndex: number
+  lineContent: string
+  lineType: 'added' | 'removed' | 'context'
+  content: string
+}
+
+export interface TabDiff {
+  path: string
+  unifiedDiff: string
+}
+
 export interface ToolCall {
   id: string
   toolName: string
@@ -140,6 +153,7 @@ export interface PiAPI {
   }
   dialog: {
     openDirectory(): Promise<string | null>
+    pickFile(): Promise<{ path: string; name: string; content: string } | null>
   }
   shell: {
     openPath(path: string): Promise<void>

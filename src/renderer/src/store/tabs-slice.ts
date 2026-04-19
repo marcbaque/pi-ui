@@ -1,5 +1,5 @@
 // src/renderer/src/store/tabs-slice.ts
-import type { Message, ToolCall, AppThinkingLevel } from '@shared/types'
+import type { Message, ToolCall, AppThinkingLevel, DiffComment, TabDiff } from '@shared/types'
 
 const uuid = () => crypto.randomUUID()
 
@@ -17,6 +17,9 @@ export interface Tab {
   currentStreamingContent: string
   mode: TabMode
   readonlySessionId?: string // past session id for readonly/loading/error tabs
+  diffPaneOpen: boolean
+  currentDiff: TabDiff | null
+  diffComments: DiffComment[]
 }
 
 export interface TabsState {
@@ -49,6 +52,11 @@ export interface TabsActions {
     }
   ): void
   replaceTab(tabId: string, newTab: Tab): void
+  setTabDiff(tabId: string, diff: TabDiff): void
+  toggleDiffPane(tabId: string): void
+  addDiffComment(tabId: string, comment: DiffComment): void
+  removeDiffComment(tabId: string, commentId: string): void
+  clearDiffComments(tabId: string): void
 }
 
 export const initialTabsState: TabsState = {
@@ -174,5 +182,39 @@ export const createTabsSlice = (
       if (idx === -1) return
       s.tabs.tabs[idx] = newTab
       s.tabs.activeTabId = newTab.id
+    }),
+
+  setTabDiff: (tabId, diff) =>
+    set((s) => {
+      const tab = s.tabs.tabs.find((t) => t.id === tabId)
+      if (!tab) return
+      tab.currentDiff = diff
+      tab.diffPaneOpen = true
+      tab.diffComments = []
+    }),
+
+  toggleDiffPane: (tabId) =>
+    set((s) => {
+      const tab = s.tabs.tabs.find((t) => t.id === tabId)
+      if (tab) tab.diffPaneOpen = !tab.diffPaneOpen
+    }),
+
+  addDiffComment: (tabId, comment) =>
+    set((s) => {
+      const tab = s.tabs.tabs.find((t) => t.id === tabId)
+      if (tab) tab.diffComments.push(comment)
+    }),
+
+  removeDiffComment: (tabId, commentId) =>
+    set((s) => {
+      const tab = s.tabs.tabs.find((t) => t.id === tabId)
+      if (!tab) return
+      tab.diffComments = tab.diffComments.filter((c) => c.id !== commentId)
+    }),
+
+  clearDiffComments: (tabId) =>
+    set((s) => {
+      const tab = s.tabs.tabs.find((t) => t.id === tabId)
+      if (tab) tab.diffComments = []
     }),
 })

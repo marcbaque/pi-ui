@@ -67,6 +67,24 @@ export const sessionHistory = {
   resumeBtn: (page: Page) => page.locator('[data-testid="resume-btn"]'),
 }
 
+export const diffPane = {
+  root: (page: Page) => page.locator('[data-testid="diff-pane"]'),
+  path: (page: Page) => page.locator('[data-testid="diff-pane-path"]'),
+  closeBtn: (page: Page) => page.locator('[data-testid="diff-pane-close-btn"]'),
+  diffView: (page: Page) => page.locator('[data-testid="diff-view"]'),
+  diffLine: (page: Page, index: number) => page.locator(`[data-testid="diff-line-${index}"]`),
+  gutterBtn: (page: Page, index: number) => page.locator(`[data-testid="diff-gutter-btn-${index}"]`),
+  comment: (page: Page) => page.locator('[data-testid="diff-comment"]'),
+  sendReviewBtn: (page: Page) => page.locator('[data-testid="send-review-btn"]'),
+  toggleBtn: (page: Page) => page.locator('[data-testid="diff-pane-toggle-btn"]'),
+}
+
+export const fileChips = {
+  container: (page: Page) => page.locator('[data-testid="file-chips"]'),
+  chip: (page: Page, name: string) => page.locator(`[data-testid="file-chip-${name}"]`),
+  attachBtn: (page: Page) => page.locator('[data-testid="attach-btn"]'),
+}
+
 export const tabs = {
   bar: (page: Page) => page.locator('[data-testid="tab-bar"]'),
   newBtn: (page: Page) => page.locator('[data-testid="tab-bar-new-btn"]'),

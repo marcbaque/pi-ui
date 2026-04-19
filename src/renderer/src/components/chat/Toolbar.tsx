@@ -18,6 +18,7 @@ export default function Toolbar() {
   const tab = useActiveTab()
   const availableModels = useAvailableModels()
   const replaceTab = useStore((s) => s.replaceTab)
+  const toggleDiffPane = useStore((s) => s.toggleDiffPane)
 
   if (!tab) return null
 
@@ -86,6 +87,23 @@ export default function Toolbar() {
           </button>
         ))}
       </div>
+
+      {/* Diff pane toggle */}
+      {tab.currentDiff && (
+        <button
+          data-testid="diff-pane-toggle-btn"
+          onClick={() => toggleDiffPane(tab.id)}
+          title={tab.diffPaneOpen ? 'Hide diff pane' : 'Show diff pane'}
+          className={cn(
+            'rounded border px-2 py-0.5 text-xs transition-colors',
+            tab.diffPaneOpen
+              ? 'border-[var(--pi-accent)] text-[var(--pi-accent)]'
+              : 'border-zinc-800 text-zinc-600 hover:text-zinc-400'
+          )}
+        >
+          ⊞
+        </button>
+      )}
 
       <button
         onClick={() => tab.cwd && window.pi.shell.openPath(tab.cwd)}

@@ -122,3 +122,35 @@ export async function startSession(page: Page): Promise<string> {
   await page.click('[data-testid="start-session-btn"]')
   return getLastSessionId(page)
 }
+
+const SAMPLE_DIFF = `--- a/src/auth.ts
++++ b/src/auth.ts
+@@ -1,4 +1,5 @@
+ import { db } from './db'
+-import { legacy } from './legacy'
++import { logger } from './logger'
++import { metrics } from './metrics'
+ 
+ export function auth() {`
+
+/** Emit a write tool-call (start + end) that triggers the diff pane. */
+export async function emitWriteToolCall(
+  page: Page,
+  sessionId: string,
+  filePath = 'src/auth.ts',
+  result = SAMPLE_DIFF,
+): Promise<void> {
+  await emitToolStart(page, sessionId, 'tool-write-1', 'write', { path: filePath })
+  await emitToolEnd(page, sessionId, 'tool-write-1', 'write', result)
+}
+
+/** Emit an edit tool-call (start + end) that triggers the diff pane. */
+export async function emitEditToolCall(
+  page: Page,
+  sessionId: string,
+  filePath = 'src/auth.ts',
+  result = SAMPLE_DIFF,
+): Promise<void> {
+  await emitToolStart(page, sessionId, 'tool-edit-1', 'edit', { path: filePath })
+  await emitToolEnd(page, sessionId, 'tool-edit-1', 'edit', result)
+}

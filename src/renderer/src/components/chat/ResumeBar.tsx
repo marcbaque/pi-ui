@@ -36,6 +36,9 @@ export default function ResumeBar({ tabId }: Props) {
         messages: tab.messages,
         currentStreamingContent: '',
         mode: 'active',
+        diffPaneOpen: false,
+        currentDiff: null,
+        diffComments: [],
       })
       const updated = await window.pi.sessions.list()
       setSessions(updated)

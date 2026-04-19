@@ -21,6 +21,9 @@ const MOCK_TAB = {
   messages: [],
   currentStreamingContent: '',
   mode: 'active' as const,
+  diffPaneOpen: false,
+  currentDiff: null,
+  diffComments: [],
 }
 
 describe('tabs slice', () => {
@@ -217,5 +220,88 @@ describe('ui slice', () => {
   it('openNewSession sets newSessionOpen to true', () => {
     getStore().openNewSession()
     expect(getStore().ui.newSessionOpen).toBe(true)
+  })
+})
+
+describe('diff pane', () => {
+  beforeEach(resetStore)
+
+  const DIFF_TAB = {
+    id: 'tab-diff-1',
+    sessionId: 'tab-diff-1',
+    cwd: '/tmp',
+    model: 'm',
+    provider: 'p',
+    thinkingLevel: 'off' as const,
+    status: 'idle' as const,
+    messages: [],
+    currentStreamingContent: '',
+    mode: 'active' as const,
+    diffPaneOpen: false,
+    currentDiff: null,
+    diffComments: [],
+  }
+
+  it('setTabDiff sets currentDiff, opens pane, and clears comments', () => {
+    getStore().createTab({ ...DIFF_TAB })
+    getStore().addDiffComment('tab-diff-1', {
+      id: 'c1',
+      lineIndex: 2,
+      lineContent: 'foo',
+      lineType: 'added',
+      content: 'old comment',
+    })
+    getStore().setTabDiff('tab-diff-1', { path: 'src/a.ts', unifiedDiff: '--- a\n+++ b\n' })
+    const t = getStore().tabs.tabs.find((t) => t.id === 'tab-diff-1')!
+    expect(t.currentDiff).toEqual({ path: 'src/a.ts', unifiedDiff: '--- a\n+++ b\n' })
+    expect(t.diffPaneOpen).toBe(true)
+    expect(t.diffComments).toHaveLength(0)
+  })
+
+  it('toggleDiffPane flips diffPaneOpen', () => {
+    getStore().createTab({ ...DIFF_TAB, id: 'tab-diff-2', sessionId: 'tab-diff-2' })
+    getStore().toggleDiffPane('tab-diff-2')
+    expect(getStore().tabs.tabs.find((t) => t.id === 'tab-diff-2')!.diffPaneOpen).toBe(true)
+    getStore().toggleDiffPane('tab-diff-2')
+    expect(getStore().tabs.tabs.find((t) => t.id === 'tab-diff-2')!.diffPaneOpen).toBe(false)
+  })
+
+  it('addDiffComment appends a comment', () => {
+    getStore().createTab({ ...DIFF_TAB })
+    const comment = {
+      id: 'c2',
+      lineIndex: 5,
+      lineContent: 'bar',
+      lineType: 'removed' as const,
+      content: 'note',
+    }
+    getStore().addDiffComment('tab-diff-1', comment)
+    expect(getStore().tabs.tabs.find((t) => t.id === 'tab-diff-1')!.diffComments).toHaveLength(1)
+  })
+
+  it('removeDiffComment removes by id', () => {
+    getStore().createTab({ ...DIFF_TAB })
+    getStore().addDiffComment('tab-diff-1', {
+      id: 'c3',
+      lineIndex: 1,
+      lineContent: 'x',
+      lineType: 'context',
+      content: 'y',
+    })
+    getStore().removeDiffComment('tab-diff-1', 'c3')
+    expect(getStore().tabs.tabs.find((t) => t.id === 'tab-diff-1')!.diffComments).toHaveLength(0)
+  })
+
+  it('clearDiffComments empties comments', () => {
+    getStore().createTab({ ...DIFF_TAB })
+    getStore().addDiffComment('tab-diff-1', {
+      id: 'c4',
+      lineIndex: 1,
+      lineContent: 'x',
+      lineType: 'context',
+      content: 'y',
+    })
+    getStore().clearDiffComments('tab-diff-1')
+    expect(getStore().tabs.tabs.find((t) => t.id === 'tab-diff-1')!.diffComments).toHaveLength(0)
   })
 })

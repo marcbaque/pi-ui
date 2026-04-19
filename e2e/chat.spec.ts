@@ -76,3 +76,39 @@ test('status updates to thinking during turn and idle after', async ({ page }) =
 
   await expect(chat.statusText(page)).toContainText('idle')
 })
+
+// ── File attachments ──────────────────────────────────────────────────────────
+import { fileChips } from './helpers/selectors'
+
+test('paperclip button is visible in input area', async ({ page }) => {
+  await expect(fileChips.attachBtn(page)).toBeVisible()
+})
+
+test('clicking paperclip button attaches a file chip', async ({ page }) => {
+  await fileChips.attachBtn(page).click()
+  // Mock pickFile returns example.ts
+  await expect(fileChips.chip(page, 'example.ts')).toBeVisible()
+})
+
+test('attached file chip can be removed with ×', async ({ page }) => {
+  await fileChips.attachBtn(page).click()
+  await expect(fileChips.chip(page, 'example.ts')).toBeVisible()
+  await page.locator('[data-testid="file-chip-example.ts"] button').click()
+  await expect(fileChips.chip(page, 'example.ts')).not.toBeVisible()
+})
+
+test('sending a message with attachment includes file content', async ({ page }) => {
+  await fileChips.attachBtn(page).click()
+  await chat.input(page).fill('use this file')
+  await chat.sendBtn(page).click()
+  const userMsg = page.locator('[data-testid="user-message"]').first()
+  await expect(userMsg).toContainText('Attached file')
+  await expect(userMsg).toContainText('use this file')
+})
+
+test('file chips are cleared after sending', async ({ page }) => {
+  await fileChips.attachBtn(page).click()
+  await chat.input(page).fill('test')
+  await chat.sendBtn(page).click()
+  await expect(fileChips.container(page)).not.toBeVisible()
+})

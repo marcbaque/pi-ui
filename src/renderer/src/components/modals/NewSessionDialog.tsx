@@ -62,6 +62,9 @@ export default function NewSessionDialog() {
         messages: [],
         currentStreamingContent: '',
         mode: 'active',
+        diffPaneOpen: false,
+        currentDiff: null,
+        diffComments: [],
       })
       closeNewSession()
     } catch (err) {
