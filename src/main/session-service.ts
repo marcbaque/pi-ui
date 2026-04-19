@@ -34,29 +34,12 @@ export class SessionService {
     private readonly settingsService: SettingsService
   ) {}
 
-  async createSession(
-    opts: CreateSessionOpts,
+  private subscribeSession(
+    sessionId: string,
+    session: SdkSession,
     onEvent: EventCallback
-  ): Promise<{ sessionId: string }> {
-    const model = this.modelService.findModel(opts.provider, opts.model)
-    if (!model) throw new Error(`Model not found: ${opts.provider}/${opts.model}`)
-
-    const loader = new DefaultResourceLoader({ cwd: opts.cwd })
-
-    const sessionManager = SessionManager.create(opts.cwd)
-    const sdkSessionId = sessionManager.getSessionId()
-
-    const { session } = await createAgentSession({
-      cwd: opts.cwd,
-      model,
-      thinkingLevel: opts.thinkingLevel,
-      resourceLoader: loader,
-      sessionManager,
-    })
-
-    const sessionId = randomUUID()
-
-    const unsubscribe = session.subscribe((event) => {
+  ): () => void {
+    return session.subscribe((event) => {
       if (event.type === 'message_update' && event.assistantMessageEvent.type === 'text_delta') {
         onEvent('pi:token', { sessionId, delta: event.assistantMessageEvent.delta })
       } else if (event.type === 'tool_execution_start') {
@@ -106,7 +89,30 @@ export class SessionService {
         onEvent('pi:idle', { sessionId })
       }
     })
+  }
 
+  async createSession(
+    opts: CreateSessionOpts,
+    onEvent: EventCallback
+  ): Promise<{ sessionId: string }> {
+    const model = this.modelService.findModel(opts.provider, opts.model)
+    if (!model) throw new Error(`Model not found: ${opts.provider}/${opts.model}`)
+
+    const loader = new DefaultResourceLoader({ cwd: opts.cwd })
+
+    const sessionManager = SessionManager.create(opts.cwd)
+    const sdkSessionId = sessionManager.getSessionId()
+
+    const { session } = await createAgentSession({
+      cwd: opts.cwd,
+      model,
+      thinkingLevel: opts.thinkingLevel,
+      resourceLoader: loader,
+      sessionManager,
+    })
+
+    const sessionId = randomUUID()
+    const unsubscribe = this.subscribeSession(sessionId, session, onEvent)
     this.sessions.set(sessionId, { session, unsubscribe, sdkSessionId })
     return { sessionId }
   }
@@ -132,9 +138,15 @@ export class SessionService {
     return Array.from(this.sessions.values()).map((s) => s.sdkSessionId)
   }
 
-  registerResumedSession(sessionId: string, sdkSession: unknown, sdkSessionId: string): void {
+  registerResumedSession(
+    sessionId: string,
+    sdkSession: unknown,
+    sdkSessionId: string,
+    onEvent: EventCallback
+  ): void {
     const session = sdkSession as SdkSession
-    this.sessions.set(sessionId, { session, unsubscribe: () => {}, sdkSessionId })
+    const unsubscribe = this.subscribeSession(sessionId, session, onEvent)
+    this.sessions.set(sessionId, { session, unsubscribe, sdkSessionId })
   }
 
   private getOrThrow(sessionId: string): ActiveSession {

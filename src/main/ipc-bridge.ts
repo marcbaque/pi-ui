@@ -165,7 +165,9 @@ export class IpcBridge {
       )
       const manager = (sdkSession as { sessionManager?: { getSessionId(): string } }).sessionManager
       const sdkSessionId = manager?.getSessionId() ?? sessionId
-      this.sessions.registerResumedSession(sessionId, sdkSession, sdkSessionId)
+      this.sessions.registerResumedSession(sessionId, sdkSession, sdkSessionId, (event, payload) =>
+        this.sendToRenderer(event, payload)
+      )
       return { sessionId }
     })
   }
