@@ -9,21 +9,21 @@ vi.mock('@/store', () => ({
 }))
 
 const mockStore = {
-  openNewSession: vi.fn(),
   openSettings: vi.fn(),
   history: {
     sessions: [],
     expandedCwds: [],
-    selectedSessionId: null,
-    loadedMessages: [],
-    loadStatus: 'idle' as const,
+  },
+  tabs: {
+    tabs: [],
+    activeTabId: null,
   },
   toggleCwdExpanded: vi.fn(),
-  selectSession: vi.fn(),
-  setLoadStatus: vi.fn(),
-  setLoadedMessages: vi.fn(),
   setSessions: vi.fn(),
-  clearReadonly: vi.fn(),
+  createTab: vi.fn(),
+  setActiveTab: vi.fn(),
+  setTabMessages: vi.fn(),
+  setTabMode: vi.fn(),
 }
 
 beforeEach(() => {
@@ -33,9 +33,9 @@ beforeEach(() => {
 })
 
 describe('Sidebar', () => {
-  it('renders header with new session button', () => {
+  it('renders pi-ui title in header', () => {
     render(<Sidebar />)
-    expect(screen.getByTestId('new-session-btn')).toBeInTheDocument()
+    expect(screen.getByText('pi-ui')).toBeInTheDocument()
   })
 
   it('renders settings button in footer', () => {
