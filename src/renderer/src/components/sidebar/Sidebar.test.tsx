@@ -18,6 +18,10 @@ const mockStore = {
     tabs: [],
     activeTabId: null,
   },
+  config: {
+    models: [],
+    providers: [],
+  },
   toggleCwdExpanded: vi.fn(),
   setSessions: vi.fn(),
   createTab: vi.fn(),

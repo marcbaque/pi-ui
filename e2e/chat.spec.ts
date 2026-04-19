@@ -102,7 +102,7 @@ test('sending a message with attachment includes file content', async ({ page })
   await chat.input(page).fill('use this file')
   await chat.sendBtn(page).click()
   const userMsg = page.locator('[data-testid="user-message"]').first()
-  await expect(userMsg).toContainText('Attached file')
+  await expect(userMsg).toContainText('Attached:')
   await expect(userMsg).toContainText('use this file')
 })
 

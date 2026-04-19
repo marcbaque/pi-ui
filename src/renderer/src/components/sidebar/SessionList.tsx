@@ -13,6 +13,7 @@ export default function SessionList() {
   const setSessions = useStore((s) => s.setSessions)
   const tabs = useStore((s) => s.tabs.tabs)
   const createTab = useStore((s) => s.createTab)
+  const models = useStore((s) => s.config.models)
   const setActiveTab = useStore((s) => s.setActiveTab)
   const setTabMessages = useStore((s) => s.setTabMessages)
   const setTabMode = useStore((s) => s.setTabMode)
@@ -65,12 +66,14 @@ export default function SessionList() {
 
     // Create a loading tab
     const tabId = crypto.randomUUID()
+    const resolvedModel = session.model ?? ''
+    const resolvedProvider = models.find((m) => m.modelId === resolvedModel)?.provider ?? ''
     createTab({
       id: tabId,
       sessionId: tabId,
       cwd: session.cwd,
-      model: session.model ?? '',
-      provider: '',
+      model: resolvedModel,
+      provider: resolvedProvider,
       thinkingLevel: 'off',
       status: 'idle',
       messages: [],

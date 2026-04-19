@@ -10,6 +10,7 @@ export default function ResumeBar({ tabId }: Props) {
   const tabs = useStore((s) => s.tabs.tabs)
   const replaceTab = useStore((s) => s.replaceTab)
   const setSessions = useStore((s) => s.setSessions)
+  const models = useStore((s) => s.config.models)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -25,12 +26,14 @@ export default function ResumeBar({ tabId }: Props) {
     setError(null)
     try {
       const { sessionId } = await window.pi.sessions.resume(session.path)
+      const resolvedModel = session.model ?? ''
+      const resolvedProvider = models.find((m) => m.modelId === resolvedModel)?.provider ?? ''
       replaceTab(tabId, {
         id: sessionId,
         sessionId,
         cwd: session.cwd,
-        model: session.model ?? '',
-        provider: '',
+        model: resolvedModel,
+        provider: resolvedProvider,
         thinkingLevel: 'off',
         status: 'idle',
         messages: tab.messages,

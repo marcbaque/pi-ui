@@ -48,7 +48,8 @@ function buildMessage(text: string, files: AttachedFile[]): string {
     .map((f) => {
       const ext = f.name.split('.').pop() ?? ''
       const lang = EXT_LANG[ext] ?? ext
-      return `**Attached file: \`${f.name}\`**\n\`\`\`${lang}\n${f.content}\n\`\`\``
+      // Use 4-backtick fence so files containing ``` don't break the block
+      return `**Attached: \`${f.name}\`**\n\`\`\`\`${lang}\n${f.content}\n\`\`\`\``
     })
     .join('\n\n')
   return text ? `${fileParts}\n\n${text}` : fileParts
