@@ -53,9 +53,13 @@ export default function ToolCallEntry({ call }: Props) {
         <span style={{ color: 'var(--pi-dim)', fontSize: '10px' }}>
           {hasOutput ? (expanded ? '▾' : '▸') : '▸'}
         </span>
-        <span className="font-medium" style={{ color: 'var(--pi-accent)' }}>
-          {call.toolName}
-        </span>
+        {call.toolName === 'bash' ? (
+          <span style={{ color: 'var(--pi-dim)' }}>$</span>
+        ) : (
+          <span className="font-medium" style={{ color: 'var(--pi-accent)' }}>
+            {call.toolName}
+          </span>
+        )}
         {displayPath && (
           <span className="flex-1 truncate text-left" style={{ color: 'var(--pi-dim-dark)' }}>
             {displayPath}
