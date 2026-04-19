@@ -47,7 +47,7 @@ export default function ToolCallEntry({ call }: Props) {
       <button
         data-testid="tool-call-toggle"
         onClick={() => hasOutput && setExpanded((e) => !e)}
-        className="flex w-full items-center gap-2 px-3 py-1 font-mono text-xs"
+        className="flex w-full items-center gap-2 px-3 py-1.5 font-mono text-xs"
         style={{ cursor: hasOutput ? 'pointer' : 'default' }}
       >
         <span style={{ color: 'var(--pi-dim)', fontSize: '10px' }}>
