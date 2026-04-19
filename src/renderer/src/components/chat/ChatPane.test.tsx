@@ -1,0 +1,111 @@
+// src/renderer/src/components/chat/ChatPane.test.tsx
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import ChatPane from './ChatPane'
+import { useStore } from '../../store'
+
+const mockSend = vi.fn(async () => {})
+const mockAbort = vi.fn(async () => {})
+
+vi.stubGlobal('pi', {
+  session: { send: mockSend, abort: mockAbort },
+  shell: { openPath: vi.fn() },
+  on: vi.fn(() => () => {}),
+})
+
+function resetStore() {
+  useStore.setState((useStore as unknown as { getInitialState: () => object }).getInitialState())
+}
+
+describe('ChatPane', () => {
+  beforeEach(() => {
+    resetStore()
+    vi.clearAllMocks()
+  })
+
+  it('shows empty state when no session is active', () => {
+    render(<ChatPane />)
+    expect(screen.getByText(/no active session/i)).toBeInTheDocument()
+  })
+
+  it('shows the message input when a session is active', () => {
+    useStore
+      .getState()
+      .setSessionActive({
+        sessionId: 's1',
+        cwd: '/code',
+        model: 'claude',
+        provider: 'anthropic',
+        thinkingLevel: 'low',
+      })
+    render(<ChatPane />)
+    expect(screen.getByPlaceholderText(/send a message/i)).toBeInTheDocument()
+  })
+
+  it('sends a message on Enter and clears the input', async () => {
+    useStore
+      .getState()
+      .setSessionActive({
+        sessionId: 's1',
+        cwd: '/code',
+        model: 'claude',
+        provider: 'anthropic',
+        thinkingLevel: 'low',
+      })
+    render(<ChatPane />)
+    const input = screen.getByPlaceholderText(/send a message/i)
+    fireEvent.change(input, { target: { value: 'hello pi' } })
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' })
+    await waitFor(() => expect(mockSend).toHaveBeenCalledWith('s1', 'hello pi'))
+    expect((input as HTMLTextAreaElement).value).toBe('')
+  })
+
+  it('does not send on Shift+Enter', () => {
+    useStore
+      .getState()
+      .setSessionActive({
+        sessionId: 's1',
+        cwd: '/code',
+        model: 'claude',
+        provider: 'anthropic',
+        thinkingLevel: 'low',
+      })
+    render(<ChatPane />)
+    const input = screen.getByPlaceholderText(/send a message/i)
+    fireEvent.change(input, { target: { value: 'draft' } })
+    fireEvent.keyDown(input, { key: 'Enter', shiftKey: true })
+    expect(mockSend).not.toHaveBeenCalled()
+  })
+
+  it('shows Stop button while thinking and calls abort', async () => {
+    useStore
+      .getState()
+      .setSessionActive({
+        sessionId: 's1',
+        cwd: '/code',
+        model: 'claude',
+        provider: 'anthropic',
+        thinkingLevel: 'low',
+      })
+    useStore.getState().setSessionStatus('thinking')
+    render(<ChatPane />)
+    const stop = screen.getByRole('button', { name: /stop/i })
+    fireEvent.click(stop)
+    await waitFor(() => expect(mockAbort).toHaveBeenCalledWith('s1'))
+  })
+
+  it('renders user messages', () => {
+    useStore
+      .getState()
+      .setSessionActive({
+        sessionId: 's1',
+        cwd: '/code',
+        model: 'claude',
+        provider: 'anthropic',
+        thinkingLevel: 'low',
+      })
+    useStore.getState().addUserMessage('hello')
+    render(<ChatPane />)
+    expect(screen.getByText('hello')).toBeInTheDocument()
+  })
+})
