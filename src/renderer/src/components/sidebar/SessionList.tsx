@@ -94,9 +94,15 @@ export default function SessionList() {
     }
   }
 
-  async function handleRename(session: SessionSummary, _name: string) {
-    // Names stored in SDK JSONL — placeholder for future SDK integration
-    console.log('rename', session.id, _name)
+  async function handleRename(session: SessionSummary, name: string) {
+    if (!name.trim()) return
+    try {
+      await window.pi.sessions.setName(session.id, name.trim())
+    } catch (err) {
+      console.error('[rename:setName]', err)
+    }
+    const updated = await window.pi.sessions.list()
+    setSessions(updated)
   }
 
   async function handleTogglePin(session: SessionSummary) {

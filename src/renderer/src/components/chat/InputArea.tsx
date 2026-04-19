@@ -4,6 +4,8 @@ import { useStore } from '@/store'
 import { useActiveTab } from '@/hooks/useActiveTab'
 import { Button } from '@/components/ui/button'
 import FileChips, { type AttachedFile } from './FileChips'
+import SlashCommandMenu from './SlashCommandMenu'
+import type { SlashCommand } from '@shared/types'
 
 const EXT_LANG: Record<string, string> = {
   ts: 'typescript',
@@ -48,8 +50,7 @@ function buildMessage(text: string, files: AttachedFile[]): string {
     .map((f) => {
       const ext = f.name.split('.').pop() ?? ''
       const lang = EXT_LANG[ext] ?? ext
-      // Use 4-backtick fence so files containing ``` don't break the block
-      return `**Attached: \`${f.name}\`**\n\`\`\`\`${lang}\n${f.content}\n\`\`\`\``
+      return `**Attached file: \`${f.name}\`**\n\`\`\`${lang}\n${f.content}\n\`\`\``
     })
     .join('\n\n')
   return text ? `${fileParts}\n\n${text}` : fileParts
@@ -63,14 +64,53 @@ export default function InputArea() {
   const [value, setValue] = useState('')
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
   const [isDragging, setIsDragging] = useState(false)
+
+  // Slash command state
+  const [slashMenuOpen, setSlashMenuOpen] = useState(false)
+  const [slashActiveIndex, setSlashActiveIndex] = useState(0)
+  const [filteredCommands, setFilteredCommands] = useState<SlashCommand[]>([])
+  const commandCacheRef = useRef<{ tabId: string; commands: SlashCommand[] } | null>(null)
+
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   if (!tab || tab.mode !== 'active') return null
 
   const thinking = tab.status === 'thinking'
-  const validFiles = attachedFiles.filter((f) => !f.error)
-  const hasContent = value.trim().length > 0 || validFiles.length > 0
-  const canSend = !thinking && hasContent
+  const hasErrors = attachedFiles.some((f) => f.error)
+  const hasContent = value.trim().length > 0 || attachedFiles.filter((f) => !f.error).length > 0
+  const canSend = hasContent && !hasErrors
+
+  function filterCommands(query: string, allCommands: SlashCommand[]): SlashCommand[] {
+    const q = query.toLowerCase()
+    return allCommands.filter(
+      (c) => c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q)
+    )
+  }
+
+  async function openSlashMenu(query: string) {
+    if (!tab) return
+    const tabId = tab.id
+    const sessionId = tab.sessionId
+    if (!commandCacheRef.current || commandCacheRef.current.tabId !== tabId) {
+      const cmds = await window.pi.session.listCommands(sessionId)
+      commandCacheRef.current = { tabId, commands: cmds }
+    }
+    const filtered = filterCommands(query, commandCacheRef.current.commands)
+    setFilteredCommands(filtered)
+    setSlashActiveIndex(0)
+    setSlashMenuOpen(true)
+  }
+
+  function closeSlashMenu() {
+    setSlashMenuOpen(false)
+    setSlashActiveIndex(0)
+  }
+
+  function handleSlashSelect(cmd: SlashCommand) {
+    setValue(cmd.insertText)
+    closeSlashMenu()
+    textareaRef.current?.focus()
+  }
 
   function addFile(name: string, path: string, content: string) {
     if (isBinary(content)) {
@@ -98,20 +138,64 @@ export default function InputArea() {
 
   async function send() {
     if (!tab || !canSend) return
-    const msg = buildMessage(value.trim(), validFiles)
+    const msg = buildMessage(value.trim(), attachedFiles)
     setValue('')
     setAttachedFiles([])
-    addUserMessage(tab.id, msg)
-    setTabStatus(tab.id, 'thinking')
-    try {
-      await window.pi.session.send(tab.sessionId, msg)
-    } catch (err) {
-      console.error('[send]', err)
-      setTabStatus(tab.id, 'error')
+    closeSlashMenu()
+    if (thinking) {
+      // Steering: deliver between tool calls without waiting for agent to finish
+      try {
+        await window.pi.session.steer(tab.sessionId, msg)
+      } catch (err) {
+        console.error('[steer]', err)
+      }
+    } else {
+      addUserMessage(tab.id, msg)
+      setTabStatus(tab.id, 'thinking')
+      try {
+        await window.pi.session.send(tab.sessionId, msg)
+      } catch (err) {
+        console.error('[send]', err)
+        setTabStatus(tab.id, 'error')
+      }
+    }
+  }
+
+  function handleChange(newValue: string) {
+    setValue(newValue)
+    if (newValue.startsWith('/')) {
+      const query = newValue.slice(1)
+      void openSlashMenu(query)
+    } else {
+      closeSlashMenu()
     }
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
+    if (slashMenuOpen) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setSlashActiveIndex((i) => Math.min(i + 1, filteredCommands.length - 1))
+        return
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setSlashActiveIndex((i) => Math.max(i - 1, 0))
+        return
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        if (filteredCommands[slashActiveIndex]) {
+          handleSlashSelect(filteredCommands[slashActiveIndex])
+        }
+        return
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        closeSlashMenu()
+        return
+      }
+    }
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       send()
@@ -150,11 +234,7 @@ export default function InputArea() {
   async function handlePaperclip() {
     try {
       const result = await window.pi.dialog.pickFile()
-      if (!result) {
-        // Canceled — restore focus to textarea
-        setTimeout(() => textareaRef.current?.focus(), 50)
-        return
-      }
+      if (!result) return
       addFile(result.name, result.path, result.content)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Could not read file'
@@ -163,9 +243,7 @@ export default function InputArea() {
         { id: crypto.randomUUID(), name: 'file', path: '', content: '', error: msg },
       ])
     }
-    // Defer focus to give the Electron window time to regain OS focus
-    // after the native dialog sheet dismisses
-    setTimeout(() => textareaRef.current?.focus(), 50)
+    textareaRef.current?.focus()
   }
 
   return (
@@ -187,24 +265,31 @@ export default function InputArea() {
 
       <div className="px-3 py-3">
         <div className="relative rounded-lg border border-zinc-800 bg-zinc-900 focus-within:border-zinc-700">
+          {slashMenuOpen && (
+            <SlashCommandMenu
+              commands={filteredCommands}
+              activeIndex={slashActiveIndex}
+              onSelect={handleSlashSelect}
+              onDismiss={closeSlashMenu}
+            />
+          )}
           <textarea
             ref={textareaRef}
             data-testid="chat-input"
-            value={thinking ? '' : value}
-            onChange={(e) => setValue(e.target.value)}
+            value={value}
+            onChange={(e) => handleChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={thinking}
             rows={1}
             placeholder={
               thinking
-                ? 'pi is working…'
+                ? 'Steer the agent… (Enter to send)'
                 : tab.status === 'error'
                   ? 'Something went wrong — try again'
                   : isDragging
                     ? 'Drop file to attach…'
                     : 'Send a message… (Enter to send, Shift+Enter for newline)'
             }
-            className="w-full resize-none bg-transparent px-3 py-2.5 pr-16 text-zinc-300 placeholder-zinc-600 outline-none disabled:cursor-not-allowed"
+            className="w-full resize-none bg-transparent px-3 py-2.5 pr-16 text-zinc-300 placeholder-zinc-600 outline-none"
             style={{ minHeight: 40, maxHeight: 160 }}
           />
           <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
@@ -277,7 +362,14 @@ export default function InputArea() {
             {tab.status}
           </span>
 
-          {/* Model + thinking */}
+          {/* Steering label */}
+          {thinking && (
+            <span data-testid="steering-label" style={{ color: 'var(--pi-dim)' }}>
+              ⟳ steering
+            </span>
+          )}
+
+          {/* Model + thinking level */}
           {tab.model && (
             <>
               <span style={{ color: 'var(--pi-dim-dark)' }}>·</span>

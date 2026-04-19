@@ -121,4 +121,40 @@ describe('SessionStore', () => {
     expect(parsed.abc.pinned).toBe(true)
     expect(parsed.abc.tags).toEqual(['foo'])
   })
+
+  describe('setNameById', () => {
+    it('calls appendSessionInfo on the session manager', async () => {
+      const mockAppendSessionInfo = vi.fn()
+      vi.mocked(SessionManager.listAll).mockResolvedValue([
+        {
+          path: '/home/.pi/agent/sessions/--home--/2024-01-01T00-00-00-000Z_abc.jsonl',
+          id: 'abc',
+          cwd: '/home',
+          name: undefined,
+          created: new Date(),
+          modified: new Date(),
+          messageCount: 1,
+          firstMessage: '',
+          allMessagesText: '',
+        },
+      ])
+
+      // Populate jsonlPathById by calling list first
+      await store.list([])
+
+      vi.mocked(SessionManager.open).mockReturnValue({
+        appendSessionInfo: mockAppendSessionInfo,
+      } as never)
+
+      await store.setNameById('abc', 'My New Name')
+      expect(SessionManager.open).toHaveBeenCalledWith(
+        '/home/.pi/agent/sessions/--home--/2024-01-01T00-00-00-000Z_abc.jsonl'
+      )
+      expect(mockAppendSessionInfo).toHaveBeenCalledWith('My New Name')
+    })
+
+    it('throws for unknown session id', async () => {
+      await expect(store.setNameById('unknown-id', 'Name')).rejects.toThrow('Unknown session')
+    })
+  })
 })

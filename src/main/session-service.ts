@@ -24,6 +24,7 @@ export interface CreateSessionOpts {
   model: string
   provider: string
   thinkingLevel: AppThinkingLevel
+  name?: string
 }
 
 export class SessionService {
@@ -114,6 +115,9 @@ export class SessionService {
     const sessionId = randomUUID()
     const unsubscribe = this.subscribeSession(sessionId, session, onEvent)
     this.sessions.set(sessionId, { session, unsubscribe, sdkSessionId })
+    if (opts.name) {
+      sessionManager.appendSessionInfo(opts.name)
+    }
     return { sessionId }
   }
 
@@ -129,6 +133,70 @@ export class SessionService {
   async abort(sessionId: string, onEvent: EventCallback): Promise<void> {
     await this.getOrThrow(sessionId).session.abort()
     onEvent('pi:idle', { sessionId })
+  }
+
+  async steer(sessionId: string, text: string): Promise<void> {
+    const entry = this.getOrThrow(sessionId)
+    await entry.session.steer(text)
+  }
+
+  listCommands(sessionId: string): import('@shared/types').SlashCommand[] {
+    const entry = this.getOrThrow(sessionId)
+    const session = entry.session as SdkSession & {
+      extensionRunner?: {
+        getRegisteredCommands(): Array<{ invocationName: string; description?: string }>
+      }
+    }
+
+    const skills = session.resourceLoader
+      .getSkills()
+      .skills.map((s: { name: string; description: string }) => ({
+        name: `skill:${s.name}`,
+        description: s.description,
+        source: 'skill' as const,
+        insertText: `/skill:${s.name}`,
+      }))
+
+    const prompts = session.resourceLoader
+      .getPrompts()
+      .prompts.map((p: { name: string; description: string }) => ({
+        name: p.name,
+        description: p.description,
+        source: 'prompt' as const,
+        insertText: `/${p.name}`,
+      }))
+
+    const extensions = (session.extensionRunner?.getRegisteredCommands() ?? []).map(
+      (c: { invocationName: string; description?: string }) => ({
+        name: c.invocationName,
+        description: c.description ?? '',
+        source: 'extension' as const,
+        insertText: `/${c.invocationName}`,
+      })
+    )
+
+    const builtins: import('@shared/types').SlashCommand[] = [
+      {
+        name: 'compact',
+        description: 'Compress the conversation context',
+        source: 'builtin',
+        insertText: '/compact',
+      },
+      {
+        name: 'name',
+        description: 'Set session display name',
+        source: 'builtin',
+        insertText: '/name ',
+      },
+      {
+        name: 'reload',
+        description: 'Reload skills, prompts, and extensions',
+        source: 'builtin',
+        insertText: '/reload',
+      },
+    ]
+
+    return [...builtins, ...skills, ...prompts, ...extensions]
   }
 
   closeSession(sessionId: string): void {

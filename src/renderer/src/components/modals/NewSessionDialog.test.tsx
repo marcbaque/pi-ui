@@ -62,4 +62,25 @@ describe('NewSessionDialog', () => {
     await waitFor(() => expect(mockCreate).toHaveBeenCalled())
     expect(useStore.getState().ui.newSessionOpen).toBe(false)
   })
+
+  it('passes name to session.create when provided', async () => {
+    useStore.getState().openNewSession()
+    render(<NewSessionDialog />)
+    const nameInput = screen.getByPlaceholderText(/my session/i)
+    fireEvent.change(nameInput, { target: { value: 'My Plan' } })
+    fireEvent.click(screen.getByRole('button', { name: /start/i }))
+    await waitFor(() =>
+      expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({ name: 'My Plan' }))
+    )
+  })
+
+  it('does not pass name when field is empty', async () => {
+    useStore.getState().openNewSession()
+    render(<NewSessionDialog />)
+    fireEvent.click(screen.getByRole('button', { name: /start/i }))
+    await waitFor(() => expect(mockCreate).toHaveBeenCalled())
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.not.objectContaining({ name: expect.anything() })
+    )
+  })
 })

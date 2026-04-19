@@ -23,6 +23,7 @@ export type FsLike = Pick<typeof fs, 'existsSync' | 'readFileSync' | 'writeFileS
 
 export class SessionStore {
   private readonly pathById = new Map<string, string>()
+  private readonly jsonlPathById = new Map<string, string>()
 
   constructor(private readonly fsImpl: FsLike = fs) {}
 
@@ -68,6 +69,7 @@ export class SessionStore {
       const sessionMeta = meta[info.id]
 
       this.pathById.set(info.id, cwdDir)
+      this.jsonlPathById.set(info.id, info.path)
 
       return {
         id: info.id,
@@ -116,6 +118,13 @@ export class SessionStore {
     const cwdDir = this.pathById.get(sessionId)
     if (!cwdDir) throw new Error(`Unknown session: ${sessionId}`)
     await this.deleteMeta(cwdDir, sessionId)
+  }
+
+  async setNameById(sdkSessionId: string, name: string): Promise<void> {
+    const jsonlPath = this.jsonlPathById.get(sdkSessionId)
+    if (!jsonlPath) throw new Error(`Unknown session: ${sdkSessionId}`)
+    const manager = SessionManager.open(jsonlPath)
+    manager.appendSessionInfo(name)
   }
 
   async load(sessionPath: string): Promise<Message[]> {

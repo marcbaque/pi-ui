@@ -29,6 +29,7 @@ export default function NewSessionDialog() {
   const [provider, setProvider] = useState(config.defaultProvider ?? '')
   const [thinking, setThinking] = useState<AppThinkingLevel>(config.defaultThinkingLevel)
   const [loading, setLoading] = useState(false)
+  const [name, setName] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   // Fall back to config defaults if user hasn't made a selection yet
@@ -50,6 +51,7 @@ export default function NewSessionDialog() {
         model: effectiveModel,
         provider: effectiveProvider,
         thinkingLevel: thinking,
+        ...(name.trim() ? { name: name.trim() } : {}),
       })
       createTab({
         id: sessionId,
@@ -109,6 +111,19 @@ export default function NewSessionDialog() {
                 Browse
               </Button>
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] uppercase tracking-widest text-zinc-500">
+              Name <span className="text-zinc-700">(optional)</span>
+            </label>
+            <Input
+              data-testid="name-input"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="flex-1 border-zinc-800 bg-zinc-900 text-xs text-zinc-300"
+              placeholder="My session"
+            />
           </div>
 
           <div className="space-y-1.5">

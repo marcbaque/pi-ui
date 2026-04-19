@@ -7,18 +7,35 @@ import type { SettingsService } from './settings-service'
 
 // --- SDK mock ---
 const mockPrompt = vi.fn()
+const mockSteer = vi.fn()
 const mockAbort = vi.fn()
 const mockDispose = vi.fn()
+const mockAppendSessionInfo = vi.fn()
 let capturedSubscriber: ((event: unknown) => void) | null = null
 
 const mockSession = {
   prompt: mockPrompt,
+  steer: mockSteer,
   abort: mockAbort,
   dispose: mockDispose,
   subscribe: vi.fn((cb: (event: unknown) => void) => {
     capturedSubscriber = cb
     return () => {}
   }),
+  resourceLoader: {
+    getSkills: vi.fn(() => ({
+      skills: [{ name: 'test-skill', description: 'A test skill' }],
+      diagnostics: [],
+    })),
+    getPrompts: vi.fn(() => ({
+      prompts: [{ name: 'my-prompt', description: 'A prompt' }],
+      diagnostics: [],
+    })),
+  },
+  extensionRunner: undefined,
+  sessionManager: {
+    appendSessionInfo: mockAppendSessionInfo,
+  },
 }
 
 vi.mock('@mariozechner/pi-coding-agent', () => ({
@@ -26,7 +43,12 @@ vi.mock('@mariozechner/pi-coding-agent', () => ({
   DefaultResourceLoader: vi.fn().mockImplementation(function () {
     return {}
   }),
-  SessionManager: { create: vi.fn(() => ({ getSessionId: () => 'sdk-session-1' })) },
+  SessionManager: {
+    create: vi.fn(() => ({
+      getSessionId: () => 'sdk-session-1',
+      appendSessionInfo: mockAppendSessionInfo,
+    })),
+  },
 }))
 
 const fakeModel = {
@@ -183,6 +205,110 @@ describe('SessionService', () => {
 
       expect(mockDispose).toHaveBeenCalled()
       await expect(service.send(sessionId, 'hi')).rejects.toThrow('Session not found')
+    })
+  })
+
+  describe('steer', () => {
+    it('calls session.steer with the message', async () => {
+      const { sessionId } = await service.createSession(
+        {
+          cwd: '/tmp',
+          model: 'claude-sonnet-4.6',
+          provider: 'github-copilot',
+          thinkingLevel: 'low',
+        },
+        onEvent
+      )
+      await service.steer(sessionId, 'please stop')
+      expect(mockSteer).toHaveBeenCalledWith('please stop')
+    })
+
+    it('throws for unknown sessionId', async () => {
+      await expect(service.steer('no-such-id', 'msg')).rejects.toThrow('Session not found')
+    })
+  })
+
+  describe('listCommands', () => {
+    it('includes curated builtins', async () => {
+      const { sessionId } = await service.createSession(
+        {
+          cwd: '/tmp',
+          model: 'claude-sonnet-4.6',
+          provider: 'github-copilot',
+          thinkingLevel: 'low',
+        },
+        onEvent
+      )
+      const cmds = service.listCommands(sessionId)
+      const names = cmds.map((c) => c.name)
+      expect(names).toContain('compact')
+      expect(names).toContain('name')
+      expect(names).toContain('reload')
+    })
+
+    it('includes skills from resource loader', async () => {
+      const { sessionId } = await service.createSession(
+        {
+          cwd: '/tmp',
+          model: 'claude-sonnet-4.6',
+          provider: 'github-copilot',
+          thinkingLevel: 'low',
+        },
+        onEvent
+      )
+      const cmds = service.listCommands(sessionId)
+      const skillCmd = cmds.find((c) => c.source === 'skill')
+      expect(skillCmd).toBeDefined()
+      expect(skillCmd!.insertText).toBe('/skill:test-skill')
+    })
+
+    it('includes prompts from resource loader', async () => {
+      const { sessionId } = await service.createSession(
+        {
+          cwd: '/tmp',
+          model: 'claude-sonnet-4.6',
+          provider: 'github-copilot',
+          thinkingLevel: 'low',
+        },
+        onEvent
+      )
+      const cmds = service.listCommands(sessionId)
+      const promptCmd = cmds.find((c) => c.source === 'prompt')
+      expect(promptCmd).toBeDefined()
+      expect(promptCmd!.insertText).toBe('/my-prompt')
+    })
+
+    it('throws for unknown sessionId', () => {
+      expect(() => service.listCommands('no-such-id')).toThrow('Session not found')
+    })
+  })
+
+  describe('createSession with name', () => {
+    it('calls appendSessionInfo when name is provided', async () => {
+      await service.createSession(
+        {
+          cwd: '/tmp',
+          model: 'claude-sonnet-4.6',
+          provider: 'github-copilot',
+          thinkingLevel: 'low',
+          name: 'My Session',
+        },
+        onEvent
+      )
+      expect(mockAppendSessionInfo).toHaveBeenCalledWith('My Session')
+    })
+
+    it('does not call appendSessionInfo when name is omitted', async () => {
+      await service.createSession(
+        {
+          cwd: '/tmp',
+          model: 'claude-sonnet-4.6',
+          provider: 'github-copilot',
+          thinkingLevel: 'low',
+        },
+        onEvent
+      )
+      expect(mockAppendSessionInfo).not.toHaveBeenCalled()
     })
   })
 })
