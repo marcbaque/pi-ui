@@ -9,6 +9,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["vitest/globals"],
     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {

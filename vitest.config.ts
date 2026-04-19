@@ -13,12 +13,6 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    environmentMatchGlobs: [
-      ['src/renderer/**', 'jsdom'],
-      ['src/main/**', 'node'],
-      ['src/preload/**', 'node'],
-      ['src/shared/**', 'node'],
-    ],
     setupFiles: ['src/renderer/src/test-setup.ts'],
     coverage: {
       provider: 'v8',
