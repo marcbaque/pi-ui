@@ -33,7 +33,7 @@ export class IpcBridge {
   // Prevents "already registered" errors on hot-reload in dev mode.
   private handle(channel: string, handler: Parameters<typeof ipcMain.handle>[1]): void {
     ipcMain.removeHandler(channel)
-    this.handle(channel, handler)
+    ipcMain.handle(channel, handler)
   }
 
   sendToRenderer<E extends PiEventName>(event: E, payload: PiEventPayloads[E]): void {

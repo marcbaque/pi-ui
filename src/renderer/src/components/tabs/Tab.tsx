@@ -36,6 +36,7 @@ export default function TabItem({ tab, isActive, onActivate, onClose }: Props) {
   return (
     <div
       data-testid={`tab-${tab.id}`}
+      data-tab-item="true"
       onClick={onActivate}
       className={cn(
         'group flex max-w-[160px] cursor-pointer items-center gap-1.5 border-r border-[var(--pi-border-subtle)] px-3 py-2 text-xs transition-colors',

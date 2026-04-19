@@ -10,9 +10,6 @@ import { SessionService } from './session-service'
 import { IpcBridge } from './ipc-bridge'
 import { SessionStore } from './session-store'
 
-// Enable remote debugging so agent-browser can connect via CDP
-app.commandLine.appendSwitch('remote-debugging-port', '9223')
-
 function createWindow(): void {
   const win = new BrowserWindow({
     width: 1280,

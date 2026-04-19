@@ -5,7 +5,7 @@ import { tabs, chat, newSessionDialog } from './helpers/selectors'
 test('tab bar is visible with one tab after creating a session', async ({ page }) => {
   await startSession(page)
   await expect(tabs.bar(page)).toBeVisible()
-  await expect(page.locator('[data-testid^="tab-test-session-"]')).toHaveCount(1)
+  await expect(page.locator('[data-tab-item="true"]')).toHaveCount(1)
 })
 
 test('tab shows cwd basename and status dot', async ({ page }) => {
@@ -36,7 +36,7 @@ test('creating a second session opens a new tab and switches to it', async ({ pa
   await startSession(page)
   const sessionId2 = await startSession(page)
 
-  await expect(page.locator('[data-testid^="tab-test-session-"]')).toHaveCount(2)
+  await expect(page.locator('[data-tab-item="true"]')).toHaveCount(2)
 
   // Active tab is the most recently created one
   const activeTab = tabs.tab(page, sessionId2)
@@ -100,11 +100,12 @@ test('closing last tab returns app to empty state', async ({ page }) => {
 })
 
 test('clicking a past session in sidebar opens it in a new tab', async ({ page }) => {
-  // past-session-1 is in the mock data (see preload mock)
+  // Expand the mock cwd group first (collapsed by default)
+  await page.locator('[data-testid="cwd-group-header---mock-project--"]').click()
   await page.locator('[data-testid="session-entry-past-session-1"]').click()
 
   // A new tab should appear
-  await expect(page.locator('[data-testid^="tab-"]')).toHaveCount(1)
+  await expect(page.locator('[data-tab-item="true"]')).toHaveCount(1)
   // The resume bar should be visible (readonly mode)
   await expect(page.locator('[data-testid="resume-bar"]')).toBeVisible()
 })
@@ -112,14 +113,16 @@ test('clicking a past session in sidebar opens it in a new tab', async ({ page }
 test('clicking same past session again focuses existing tab without creating a duplicate', async ({
   page,
 }) => {
+  // Expand the mock cwd group first
+  await page.locator('[data-testid="cwd-group-header---mock-project--"]').click()
   await page.locator('[data-testid="session-entry-past-session-1"]').click()
-  await expect(page.locator('[data-testid^="tab-"]')).toHaveCount(1)
+  await expect(page.locator('[data-tab-item="true"]')).toHaveCount(1)
 
   // Click a different past session
   await page.locator('[data-testid="session-entry-past-session-2"]').click()
-  await expect(page.locator('[data-testid^="tab-"]')).toHaveCount(2)
+  await expect(page.locator('[data-tab-item="true"]')).toHaveCount(2)
 
   // Click past-session-1 again — should focus existing tab, not create a third
   await page.locator('[data-testid="session-entry-past-session-1"]').click()
-  await expect(page.locator('[data-testid^="tab-"]')).toHaveCount(2)
+  await expect(page.locator('[data-tab-item="true"]')).toHaveCount(2)
 })

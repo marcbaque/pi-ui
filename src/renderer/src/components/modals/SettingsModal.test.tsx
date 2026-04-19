@@ -7,10 +7,12 @@ import { useStore } from '../../store'
 const mockSetApiKey = vi.fn(async () => {})
 const mockSetDefaults = vi.fn(async () => {})
 const mockListModels = vi.fn(async () => [])
+const mockOpenDirectory = vi.fn(async () => '/selected/dir')
 
 vi.stubGlobal('pi', {
   config: { setApiKey: mockSetApiKey, setDefaults: mockSetDefaults },
   models: { list: mockListModels },
+  dialog: { openDirectory: mockOpenDirectory },
   on: vi.fn(() => () => {}),
 })
 
@@ -53,6 +55,16 @@ describe('SettingsModal', () => {
     fireEvent.change(input, { target: { value: 'sk-ant-abc' } })
     fireEvent.click(screen.getByRole('button', { name: /save anthropic/i }))
     await waitFor(() => expect(mockSetApiKey).toHaveBeenCalledWith('anthropic', 'sk-ant-abc'))
+  })
+
+  it('Browse button calls openDirectory and populates the input', async () => {
+    useStore.getState().openSettings()
+    render(<SettingsModal />)
+    fireEvent.click(screen.getByRole('button', { name: /browse/i }))
+    await waitFor(() => expect(mockOpenDirectory).toHaveBeenCalled())
+    await waitFor(() =>
+      expect(screen.getByPlaceholderText(/~\/code/i)).toHaveValue('/selected/dir')
+    )
   })
 
   it('closes when the dialog onOpenChange fires with false', () => {

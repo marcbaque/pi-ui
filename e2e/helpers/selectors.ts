@@ -56,7 +56,7 @@ export const settingsModal = {
 export const sessionHistory = {
   list: (page: Page) => page.locator('[data-testid="session-list"]'),
   search: (page: Page) => page.locator('[data-testid="session-search"]'),
-  cwdGroup: (page: Page, slug: string) => page.locator(`[data-testid="cwd-group-${slug}"]`),
+  cwdGroup: (page: Page, slug: string) => page.locator(`[data-testid="cwd-group-header-${slug}"]`),
   sessionEntry: (page: Page, id: string) => page.locator(`[data-testid="session-entry-${id}"]`),
   contextMenu: (page: Page) => page.locator('[data-testid="session-context-menu"]'),
   contextMenuRename: (page: Page) => page.locator('[data-testid="context-menu-rename"]'),

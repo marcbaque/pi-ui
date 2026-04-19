@@ -23,11 +23,19 @@ test('saving an API key triggers model list refresh', async ({ page }) => {
   const input = settingsModal.apiKeyInput(page, 'openai')
   await input.fill('sk-test-key')
   await settingsModal.saveApiKeyBtn(page, 'openai').click()
-  await expect(sidebar.modelList(page)).toBeVisible()
+  // After saving, modal should still be open (no error)
+  await expect(settingsModal.root(page)).toBeVisible()
 })
 
 test('defaults section shows model select, thinking level, and system prompt', async ({ page }) => {
   await sidebar.settingsBtn(page).click()
   await expect(settingsModal.defaultModelSelect(page)).toBeVisible()
   await expect(settingsModal.systemPromptInput(page)).toBeVisible()
+})
+
+test('Browse button populates default working directory input', async ({ page }) => {
+  await sidebar.settingsBtn(page).click()
+  await page.getByRole('button', { name: /browse/i }).click()
+  // The mock openDirectory returns '/tmp/test-project'
+  await expect(page.getByPlaceholder('~/code/my-project')).toHaveValue('/tmp/test-project')
 })

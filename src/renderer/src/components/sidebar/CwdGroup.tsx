@@ -43,6 +43,7 @@ export default function CwdGroup({
   return (
     <div data-testid={`cwd-group-${cwdSlug}`}>
       <button
+        data-testid={`cwd-group-header-${cwdSlug}`}
         onClick={onToggle}
         title={cwd}
         className="flex w-full items-center gap-1.5 rounded-md px-2 py-0.5 text-left text-zinc-600 transition-colors hover:text-zinc-400"

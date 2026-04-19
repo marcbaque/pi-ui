@@ -8,12 +8,12 @@ import {
   emitTurnEnd,
   emitIdle,
   getLastSessionId,
+  startSession,
 } from './helpers/app'
-import { sidebar, chat, newSessionDialog } from './helpers/selectors'
+import { chat } from './helpers/selectors'
 
 test.beforeEach(async ({ page }) => {
-  await sidebar.newSessionBtn(page).click()
-  await newSessionDialog.startBtn(page).click()
+  await startSession(page)
 })
 
 test('chat pane shows active state after session creation', async ({ page }) => {
