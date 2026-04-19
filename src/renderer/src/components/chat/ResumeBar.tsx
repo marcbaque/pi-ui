@@ -11,6 +11,7 @@ export default function ResumeBar({ tabId }: Props) {
   const replaceTab = useStore((s) => s.replaceTab)
   const setSessions = useStore((s) => s.setSessions)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const tab = tabs.find((t) => t.id === tabId)
   const historySessions = useStore((s) => s.history.sessions)
@@ -21,6 +22,7 @@ export default function ResumeBar({ tabId }: Props) {
   async function handleResume() {
     if (!tab || !session) return
     setLoading(true)
+    setError(null)
     try {
       const { sessionId } = await window.pi.sessions.resume(session.path)
       replaceTab(tabId, {
@@ -39,6 +41,7 @@ export default function ResumeBar({ tabId }: Props) {
       setSessions(updated)
     } catch (err) {
       console.error('Failed to resume session:', err)
+      setError(err instanceof Error ? err.message : String(err))
     } finally {
       setLoading(false)
     }
@@ -47,17 +50,24 @@ export default function ResumeBar({ tabId }: Props) {
   return (
     <div
       data-testid="resume-bar"
-      className="flex items-center justify-between border-t border-[var(--pi-border-subtle)] bg-[var(--pi-sidebar-bg)] px-4 py-3"
+      className="flex flex-col gap-2 border-t border-[var(--pi-border-subtle)] bg-[var(--pi-sidebar-bg)] px-4 py-3"
     >
-      <span className="text-xs text-zinc-600">This is a past session</span>
-      <button
-        data-testid="resume-btn"
-        onClick={handleResume}
-        disabled={loading}
-        className="rounded-md bg-[var(--pi-tool-success-bg)] px-3 py-1.5 text-xs text-[var(--pi-accent)] transition-colors hover:bg-emerald-900 disabled:opacity-50"
-      >
-        {loading ? 'Resuming…' : 'Resume →'}
-      </button>
+      {error && (
+        <p className="rounded border border-red-900/40 bg-red-900/20 px-2 py-1.5 text-xs text-red-400">
+          {error}
+        </p>
+      )}
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-zinc-600">This is a past session</span>
+        <button
+          data-testid="resume-btn"
+          onClick={handleResume}
+          disabled={loading}
+          className="rounded-md bg-[var(--pi-tool-success-bg)] px-3 py-1.5 text-xs text-[var(--pi-accent)] transition-colors hover:bg-emerald-900 disabled:opacity-50"
+        >
+          {loading ? 'Resuming…' : 'Resume →'}
+        </button>
+      </div>
     </div>
   )
 }

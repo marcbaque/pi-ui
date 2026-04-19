@@ -157,18 +157,27 @@ export class IpcBridge {
     })
 
     this.handle('session:resume', async (_e, { sessionPath }: { sessionPath: string }) => {
-      const { sessionId, sdkSession } = await this.store.resume(
-        sessionPath,
-        this.models,
-        this.settings,
-        (event, payload) => this.sendToRenderer(event, payload)
-      )
-      const manager = (sdkSession as { sessionManager?: { getSessionId(): string } }).sessionManager
-      const sdkSessionId = manager?.getSessionId() ?? sessionId
-      this.sessions.registerResumedSession(sessionId, sdkSession, sdkSessionId, (event, payload) =>
-        this.sendToRenderer(event, payload)
-      )
-      return { sessionId }
+      try {
+        const { sessionId, sdkSession } = await this.store.resume(
+          sessionPath,
+          this.models,
+          this.settings,
+          (event, payload) => this.sendToRenderer(event, payload)
+        )
+        const manager = (sdkSession as { sessionManager?: { getSessionId(): string } })
+          .sessionManager
+        const sdkSessionId = manager?.getSessionId() ?? sessionId
+        this.sessions.registerResumedSession(
+          sessionId,
+          sdkSession,
+          sdkSessionId,
+          (event, payload) => this.sendToRenderer(event, payload)
+        )
+        return { sessionId }
+      } catch (err) {
+        console.error('[session:resume] failed:', err)
+        throw err
+      }
     })
   }
 }
