@@ -21,6 +21,7 @@ export function usePiEvents(): void {
 
     const unsubs = [
       window.pi.on('pi:token', ({ sessionId, delta }) => {
+        console.log(`[usePiEvents] pi:token sessionId=${sessionId} tabId=${findTabId(sessionId)}`)
         const tabId = findTabId(sessionId)
         if (!tabId) return
         appendToken(tabId, delta)

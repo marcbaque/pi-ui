@@ -37,6 +37,7 @@ export class IpcBridge {
   }
 
   sendToRenderer<E extends PiEventName>(event: E, payload: PiEventPayloads[E]): void {
+    console.log(`[sendToRenderer] event=${event} payload=${JSON.stringify(payload).slice(0, 80)}`)
     if (!this.win.isDestroyed()) {
       this.win.webContents.send(event, payload)
     }
