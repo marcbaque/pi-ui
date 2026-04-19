@@ -8,8 +8,8 @@ import {
   emitTurnEnd,
   emitIdle,
   getLastSessionId,
-} from '../helpers/app'
-import { sidebar, chat, newSessionDialog } from '../helpers/selectors'
+} from './helpers/app'
+import { sidebar, chat, newSessionDialog } from './helpers/selectors'
 
 test.beforeEach(async ({ page }) => {
   await sidebar.newSessionBtn(page).click()

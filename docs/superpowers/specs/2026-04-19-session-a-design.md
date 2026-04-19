@@ -228,7 +228,7 @@ tsconfig.e2e.json
 Each stub file contains `test.skip(...)` entries with descriptive names. Example:
 
 ```typescript
-// e2e/phase2/session-history.spec.ts
+// e2e/session-history.spec.ts
 import { test } from '@playwright/test';
 
 test.skip('sidebar shows past sessions grouped by date', () => {});
@@ -261,8 +261,8 @@ E2E tests run in `ci.yml` on every push and PR to `main`:
 | `e2e/mocks/pi-bridge.ts` | `MockPiBridge` implementing `PiAPI` |
 | `e2e/helpers/app.ts` | Launch/teardown, shared fixtures |
 | `e2e/helpers/selectors.ts` | Reusable locator helpers |
-| `e2e/phase1/*.spec.ts` | 5 spec files, all implemented |
-| `e2e/phase2/*.spec.ts` | 3 stub files, all `test.skip` |
+| `e2e/*.spec.ts` | 5 spec files, all implemented |
+| `e2e/*.spec.ts` | 3 stub files, all `test.skip` |
 | `.github/workflows/ci.yml` | CI workflow |
 | `.github/workflows/release.yml` | Release workflow |
 

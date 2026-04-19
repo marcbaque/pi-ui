@@ -1,4 +1,4 @@
-// e2e/phase2/diff-pane.spec.ts
+// e2e/diff-pane.spec.ts
 // Stubs for Session D — Diff Pane
 import { test } from '@playwright/test'
 

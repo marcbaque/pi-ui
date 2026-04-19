@@ -1,6 +1,6 @@
 // e2e/phase1/abort.spec.ts
-import { test, expect, emitIdle, getLastSessionId } from '../helpers/app'
-import { sidebar, chat, newSessionDialog } from '../helpers/selectors'
+import { test, expect, emitIdle, getLastSessionId } from './helpers/app'
+import { sidebar, chat, newSessionDialog } from './helpers/selectors'
 
 test.beforeEach(async ({ page }) => {
   await sidebar.newSessionBtn(page).click()

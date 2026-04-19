@@ -1,4 +1,4 @@
-// e2e/phase2/session-history.spec.ts
+// e2e/session-history.spec.ts
 // Stubs for Session B — Session History & Sidebar
 import { test } from '@playwright/test'
 

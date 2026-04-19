@@ -1,7 +1,7 @@
 // e2e/phase1/startup.spec.ts
-import { test, expect } from '../helpers/app'
-import { sidebar, chat } from '../helpers/selectors'
-import { DEFAULT_MODELS, DEFAULT_CONFIG } from '../helpers/defaults'
+import { test, expect } from './helpers/app'
+import { sidebar, chat } from './helpers/selectors'
+import { DEFAULT_MODELS, DEFAULT_CONFIG } from './helpers/defaults'
 
 test('app launches without errors', async ({ page }) => {
   await expect(page.locator('#root')).toBeVisible()

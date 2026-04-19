@@ -284,7 +284,7 @@ This ships before Phase 2 work begins — release infrastructure and test covera
 
 *(Full design to be written in the Session B brainstorm. Spec summary from full roadmap below.)*
 
-**E2E tests:** Session B implements the skipped stubs in `e2e/phase2/session-history.spec.ts` and adds any new scenarios discovered during implementation.
+**E2E tests:** Session B implements the skipped stubs in `e2e/session-history.spec.ts` and adds any new scenarios discovered during implementation.
 
 **Sidebar additions:**
 - Session history list below providers, grouped by date (Today, Yesterday, past weeks)
@@ -309,7 +309,7 @@ This ships before Phase 2 work begins — release infrastructure and test covera
 
 *(Full design to be written in the Session C brainstorm. Spec summary from full roadmap below.)*
 
-**E2E tests:** Session C implements the skipped stubs in `e2e/phase2/tabs.spec.ts` and adds any new scenarios discovered during implementation.
+**E2E tests:** Session C implements the skipped stubs in `e2e/tabs.spec.ts` and adds any new scenarios discovered during implementation.
 
 **Tab bar:**
 - Tabs across the top of the window, one per open session
@@ -331,7 +331,7 @@ This ships before Phase 2 work begins — release infrastructure and test covera
 
 *(Full design to be written in the Session D brainstorm. Spec summary from full roadmap below.)*
 
-**E2E tests:** Session D implements the skipped stubs in `e2e/phase2/diff-pane.spec.ts` and adds any new scenarios discovered during implementation.
+**E2E tests:** Session D implements the skipped stubs in `e2e/diff-pane.spec.ts` and adds any new scenarios discovered during implementation.
 
 **Diff pane:**
 - Right panel of per-tab split view, hidden by default

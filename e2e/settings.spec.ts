@@ -1,6 +1,6 @@
 // e2e/phase1/settings.spec.ts
-import { test, expect } from '../helpers/app'
-import { sidebar, settingsModal } from '../helpers/selectors'
+import { test, expect } from './helpers/app'
+import { sidebar, settingsModal } from './helpers/selectors'
 
 test('settings modal opens via sidebar footer button', async ({ page }) => {
   await sidebar.settingsBtn(page).click()

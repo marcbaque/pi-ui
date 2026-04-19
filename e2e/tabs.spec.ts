@@ -1,4 +1,4 @@
-// e2e/phase2/tabs.spec.ts
+// e2e/tabs.spec.ts
 // Stubs for Session C — Tab Bar & Multi-Session
 import { test } from '@playwright/test'
 
