@@ -1,12 +1,7 @@
 // src/renderer/src/store/index.ts
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
-import {
-  initialSessionState,
-  createSessionSlice,
-  type SessionState,
-  type SessionActions,
-} from './session-slice'
+import { initialTabsState, createTabsSlice, type TabsState, type TabsActions } from './tabs-slice'
 import {
   initialConfigState,
   createConfigSlice,
@@ -14,7 +9,6 @@ import {
   type ConfigActions,
 } from './config-slice'
 import { initialUiState, createUiSlice, type UiState, type UiActions } from './ui-slice'
-
 import {
   initialHistoryState,
   createHistorySlice,
@@ -23,17 +17,17 @@ import {
 } from './history-slice'
 
 type AppStore = {
-  session: SessionState
+  tabs: TabsState
   config: ConfigState
   ui: UiState
   history: HistoryState
-} & SessionActions &
+} & TabsActions &
   ConfigActions &
   UiActions &
   HistoryActions
 
 const initialState = {
-  session: initialSessionState,
+  tabs: initialTabsState,
   config: initialConfigState,
   ui: initialUiState,
   history: initialHistoryState,
@@ -42,17 +36,15 @@ const initialState = {
 export const useStore = create<AppStore>()(
   immer((set) => ({
     ...initialState,
-    ...createHistorySlice(set as Parameters<typeof createHistorySlice>[0]),
-    ...createSessionSlice(set as Parameters<typeof createSessionSlice>[0]),
+    ...createTabsSlice(set as Parameters<typeof createTabsSlice>[0]),
     ...createConfigSlice(set as Parameters<typeof createConfigSlice>[0]),
     ...createUiSlice(set as Parameters<typeof createUiSlice>[0]),
+    ...createHistorySlice(set as Parameters<typeof createHistorySlice>[0]),
   }))
 )
-
-// Expose initial state for test resets
 ;(useStore as unknown as { getInitialState: () => typeof initialState }).getInitialState = () => ({
   ...initialState,
-  session: { ...initialSessionState, messages: [] },
+  tabs: { tabs: [], activeTabId: null },
   config: { ...initialConfigState, providers: [], models: [] },
   ui: { ...initialUiState },
   history: { ...initialHistoryState },

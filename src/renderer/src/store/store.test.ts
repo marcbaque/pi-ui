@@ -10,120 +10,119 @@ function resetStore() {
   useStore.setState((useStore as unknown as { getInitialState: () => object }).getInitialState())
 }
 
-describe('session slice', () => {
+const MOCK_TAB = {
+  id: 'tab-1',
+  sessionId: 'tab-1',
+  cwd: '/code',
+  model: 'claude',
+  provider: 'anthropic',
+  thinkingLevel: 'low' as const,
+  status: 'idle' as const,
+  messages: [],
+  currentStreamingContent: '',
+  mode: 'active' as const,
+}
+
+describe('tabs slice', () => {
   beforeEach(resetStore)
 
-  it('starts with no active session', () => {
-    expect(getStore().session.active).toBe(false)
-    expect(getStore().session.messages).toEqual([])
+  it('starts with no tabs and no activeTabId', () => {
+    expect(getStore().tabs.tabs).toEqual([])
+    expect(getStore().tabs.activeTabId).toBeNull()
   })
 
-  it('setSessionActive marks session as active with given props', () => {
-    getStore().setSessionActive({
-      sessionId: 'abc',
-      cwd: '/code',
-      model: 'claude',
-      provider: 'anthropic',
-      thinkingLevel: 'low',
-    })
-    expect(getStore().session.active).toBe(true)
-    expect(getStore().session.sessionId).toBe('abc')
-    expect(getStore().session.status).toBe('idle')
+  it('createTab adds a tab and sets it as active', () => {
+    getStore().createTab(MOCK_TAB)
+    expect(getStore().tabs.tabs).toHaveLength(1)
+    expect(getStore().tabs.activeTabId).toBe('tab-1')
   })
 
-  it('appendToken appends delta to currentStreamingContent', () => {
-    getStore().setSessionActive({
-      sessionId: 'abc',
-      cwd: '/code',
-      model: 'claude',
-      provider: 'anthropic',
-      thinkingLevel: 'low',
-    })
-    getStore().appendToken('Hello')
-    getStore().appendToken(' world')
-    expect(getStore().session.currentStreamingContent).toBe('Hello world')
+  it('closeTab removes the tab and activates the nearest remaining (prefer left)', () => {
+    getStore().createTab(MOCK_TAB)
+    getStore().createTab({ ...MOCK_TAB, id: 'tab-2', sessionId: 'tab-2' })
+    getStore().createTab({ ...MOCK_TAB, id: 'tab-3', sessionId: 'tab-3' })
+    // tab-3 is now active. close tab-3 → should activate tab-2 (left neighbor)
+    getStore().closeTab('tab-3')
+    expect(getStore().tabs.tabs).toHaveLength(2)
+    expect(getStore().tabs.activeTabId).toBe('tab-2')
   })
 
-  it('addUserMessage pushes a user message and clears streaming content', () => {
-    getStore().setSessionActive({
-      sessionId: 'abc',
-      cwd: '/code',
-      model: 'claude',
-      provider: 'anthropic',
-      thinkingLevel: 'low',
-    })
-    getStore().addUserMessage('fix the bug')
-    expect(getStore().session.messages).toHaveLength(1)
-    expect(getStore().session.messages[0].role).toBe('user')
-    expect(getStore().session.messages[0].content).toBe('fix the bug')
+  it('closeTab with last tab sets activeTabId to null', () => {
+    getStore().createTab(MOCK_TAB)
+    getStore().closeTab('tab-1')
+    expect(getStore().tabs.tabs).toHaveLength(0)
+    expect(getStore().tabs.activeTabId).toBeNull()
+  })
+
+  it('appendToken appends delta to the correct tab currentStreamingContent', () => {
+    getStore().createTab(MOCK_TAB)
+    getStore().appendToken('tab-1', 'Hello')
+    getStore().appendToken('tab-1', ' world')
+    expect(getStore().tabs.tabs[0].currentStreamingContent).toBe('Hello world')
+  })
+
+  it('addUserMessage pushes a user message to the correct tab', () => {
+    getStore().createTab(MOCK_TAB)
+    getStore().addUserMessage('tab-1', 'fix the bug')
+    expect(getStore().tabs.tabs[0].messages).toHaveLength(1)
+    expect(getStore().tabs.tabs[0].messages[0].role).toBe('user')
+    expect(getStore().tabs.tabs[0].messages[0].content).toBe('fix the bug')
   })
 
   it('finalizeAssistantMessage moves streaming content into a message and clears buffer', () => {
-    getStore().setSessionActive({
-      sessionId: 'abc',
-      cwd: '/code',
-      model: 'claude',
-      provider: 'anthropic',
-      thinkingLevel: 'low',
-    })
-    getStore().appendToken('Sure!')
-    getStore().finalizeAssistantMessage()
-    expect(getStore().session.messages).toHaveLength(1)
-    expect(getStore().session.messages[0].role).toBe('assistant')
-    expect(getStore().session.messages[0].content).toBe('Sure!')
-    expect(getStore().session.currentStreamingContent).toBe('')
+    getStore().createTab(MOCK_TAB)
+    getStore().appendToken('tab-1', 'Sure!')
+    getStore().finalizeAssistantMessage('tab-1')
+    expect(getStore().tabs.tabs[0].messages).toHaveLength(1)
+    expect(getStore().tabs.tabs[0].messages[0].role).toBe('assistant')
+    expect(getStore().tabs.tabs[0].messages[0].content).toBe('Sure!')
+    expect(getStore().tabs.tabs[0].currentStreamingContent).toBe('')
   })
 
-  it('addToolCall adds a pending tool call to the latest assistant message', () => {
-    getStore().setSessionActive({
-      sessionId: 'abc',
-      cwd: '/code',
-      model: 'claude',
-      provider: 'anthropic',
-      thinkingLevel: 'low',
+  it('addToolCall adds a pending tool call to the latest message in the correct tab', () => {
+    getStore().createTab(MOCK_TAB)
+    getStore().addUserMessage('tab-1', 'read the file')
+    getStore().appendToken('tab-1', 'Reading...')
+    getStore().finalizeAssistantMessage('tab-1')
+    getStore().addToolCall('tab-1', {
+      toolCallId: 't1',
+      toolName: 'read',
+      args: { path: 'foo.ts' },
     })
-    getStore().addUserMessage('read the file')
-    getStore().appendToken('Reading...')
-    getStore().finalizeAssistantMessage()
-    getStore().addToolCall({ toolCallId: 't1', toolName: 'read', args: { path: 'foo.ts' } })
-    const lastMsg = getStore().session.messages[1]
+    const lastMsg = getStore().tabs.tabs[0].messages[1]
     expect(lastMsg.toolCalls).toHaveLength(1)
     expect(lastMsg.toolCalls[0].status).toBe('pending')
   })
 
-  it('resolveToolCall updates the matching tool call to done', () => {
-    getStore().setSessionActive({
-      sessionId: 'abc',
-      cwd: '/code',
-      model: 'claude',
-      provider: 'anthropic',
-      thinkingLevel: 'low',
-    })
-    getStore().appendToken('ok')
-    getStore().finalizeAssistantMessage()
-    getStore().addToolCall({ toolCallId: 't1', toolName: 'read', args: {} })
-    getStore().resolveToolCall({
+  it('resolveToolCall updates the matching tool call to done in the correct tab', () => {
+    getStore().createTab(MOCK_TAB)
+    getStore().appendToken('tab-1', 'ok')
+    getStore().finalizeAssistantMessage('tab-1')
+    getStore().addToolCall('tab-1', { toolCallId: 't1', toolName: 'read', args: {} })
+    getStore().resolveToolCall('tab-1', {
       toolCallId: 't1',
       result: 'file contents',
       isError: false,
       durationMs: 42,
     })
-    const tool = getStore().session.messages[0].toolCalls[0]
+    const tool = getStore().tabs.tabs[0].messages[0].toolCalls[0]
     expect(tool.status).toBe('done')
     expect(tool.result).toBe('file contents')
     expect(tool.durationMs).toBe(42)
   })
 
-  it('setSessionStatus updates the status', () => {
-    getStore().setSessionActive({
-      sessionId: 'abc',
-      cwd: '/code',
-      model: 'claude',
-      provider: 'anthropic',
-      thinkingLevel: 'low',
-    })
-    getStore().setSessionStatus('thinking')
-    expect(getStore().session.status).toBe('thinking')
+  it('setTabStatus updates the status of the correct tab', () => {
+    getStore().createTab(MOCK_TAB)
+    getStore().setTabStatus('tab-1', 'thinking')
+    expect(getStore().tabs.tabs[0].status).toBe('thinking')
+  })
+
+  it('replaceTab replaces the tab and sets it as active', () => {
+    getStore().createTab(MOCK_TAB)
+    const newTab = { ...MOCK_TAB, id: 'tab-new', sessionId: 'tab-new', cwd: '/new' }
+    getStore().replaceTab('tab-1', newTab)
+    expect(getStore().tabs.tabs[0].id).toBe('tab-new')
+    expect(getStore().tabs.activeTabId).toBe('tab-new')
   })
 })
 
@@ -154,6 +153,45 @@ describe('config slice', () => {
       { provider: 'anthropic', modelId: 'claude', displayName: 'Claude', supportsThinking: true },
     ])
     expect(getStore().config.models).toHaveLength(1)
+  })
+})
+
+describe('history slice', () => {
+  beforeEach(resetStore)
+
+  it('starts with empty sessions and no expanded cwds', () => {
+    expect(getStore().history.sessions).toEqual([])
+    expect(getStore().history.expandedCwds).toEqual([])
+  })
+
+  it('setSessions replaces the session list', () => {
+    getStore().setSessions([
+      {
+        id: 'abc',
+        path: '/home/.pi/sessions/--code--/session.jsonl',
+        cwd: '/code',
+        cwdSlug: '--code--',
+        lastActiveAt: 0,
+        model: null,
+        pinned: false,
+        tags: [],
+        name: null,
+        isActive: false,
+      },
+    ])
+    expect(getStore().history.sessions).toHaveLength(1)
+    expect(getStore().history.sessions[0].id).toBe('abc')
+  })
+
+  it('toggleCwdExpanded adds a cwd slug when not present', () => {
+    getStore().toggleCwdExpanded('--code--')
+    expect(getStore().history.expandedCwds).toContain('--code--')
+  })
+
+  it('toggleCwdExpanded removes a cwd slug when already present', () => {
+    getStore().toggleCwdExpanded('--code--')
+    getStore().toggleCwdExpanded('--code--')
+    expect(getStore().history.expandedCwds).not.toContain('--code--')
   })
 })
 
