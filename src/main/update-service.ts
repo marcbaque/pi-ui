@@ -1,5 +1,6 @@
 // src/main/update-service.ts
-import { autoUpdater } from 'electron-updater'
+import electronUpdater from 'electron-updater'
+const { autoUpdater } = electronUpdater
 import type { BrowserWindow } from 'electron'
 import type { PiEventPayloads, PiEventName } from '@shared/types'
 
